@@ -1,0 +1,31 @@
+<items totalitems="3" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse"
+  pubdate="Fri, 04 Apr 2025 11:41:47 +0000">
+  <item objecttype="thing" objectid="101001" subtype="boardgame" collid="201001">
+    <name sortindex="1">Example Strategy Card Game</name>
+    <yearpublished>2022</yearpublished>
+    <image>https://example.com/images/game1_full.jpg</image>
+    <thumbnail>https://example.com/images/game1_thumb.jpg</thumbnail>
+    <status own="0" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0"
+      wishlist="0" preordered="0" lastmodified="2025-03-12 08:02:55" />
+    <numplays>0</numplays>
+    <comment>This is an example comment about a board game.</comment>
+  </item>
+  <item objecttype="thing" objectid="101002" subtype="boardgame" collid="201002">
+    <name sortindex="1">Sample Economic Game</name>
+    <yearpublished>2020</yearpublished>
+    <image>https://example.com/images/game2_full.jpg</image>
+    <thumbnail>https://example.com/images/game2_thumb.jpg</thumbnail>
+    <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0"
+      wishlist="0" preordered="0" lastmodified="2025-03-16 10:32:55" />
+    <numplays>3</numplays>
+  </item>
+  <item objecttype="thing" objectid="101003" subtype="boardgame" collid="201003">
+    <name sortindex="1">Generic Family Game</name>
+    <yearpublished>2018</yearpublished>
+    <image>https://example.com/images/game3_full.jpg</image>
+    <thumbnail>https://example.com/images/game3_thumb.jpg</thumbnail>
+    <status own="0" prevowned="0" fortrade="0" want="0" wanttoplay="1" wanttobuy="0"
+      wishlist="1" preordered="0" lastmodified="2025-02-12 02:58:00" />
+    <numplays>0</numplays>
+  </item>
+</items>

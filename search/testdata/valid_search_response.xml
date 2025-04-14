@@ -1,0 +1,18 @@
+<items total="4" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item type="boardgame" id="134277">
+        <name type="alternate" value="Example Board Game Expansion" />
+        <yearpublished value="2012" />
+    </item>
+    <item type="boardgame" id="110308">
+        <name type="primary" value="Sample Strategy Game" />
+        <yearpublished value="2011" />
+    </item>
+    <item type="boardgame" id="123386">
+        <name type="primary" value="Generic Board Game" />
+        <yearpublished value="2012" />
+    </item>
+    <item type="boardgame" id="5824">
+        <name type="alternate" value="Test Family Game" />
+        <yearpublished value="2003" />
+    </item>
+</items>

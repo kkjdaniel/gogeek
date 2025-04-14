@@ -1,0 +1,15 @@
+<forum id="123" title="Example Forum" numthreads="3" numposts="499"
+    lastpostdate="Thu, 01 Jan 2025 00:00:00 +0000" noposting="0"
+    termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <threads>
+        <thread id="1234" subject="Example Thread Topic 1" author="example_user1"
+            numarticles="1" postdate="Tue, 28 Jan 2025 04:50:26 +0000"
+            lastpostdate="Tue, 28 Jan 2025 04:50:26 +0000" />
+        <thread id="1235" subject="Example Thread Topic 2"
+            author="example_user2" numarticles="1" postdate="Thu, 23 Jan 2025 18:37:40 +0000"
+            lastpostdate="Thu, 23 Jan 2025 18:37:40 +0000" />
+        <thread id="1236" subject="Example Thread Topic 3" author="example_user3"
+            numarticles="45" postdate="Sun, 10 Jan 2025 23:43:41 +0000"
+            lastpostdate="Tue, 14 Jan 2025 00:45:23 +0000" />
+    </threads>
+</forum>

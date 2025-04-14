@@ -1,0 +1,19 @@
+<plays username="example_user" userid="123" total="15" page="1"
+    termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <play id="97385232" date="2025-04-03" quantity="1" length="140" incomplete="0" nowinstats="0"
+        location="Home">
+        <item name="Example Card Game" objecttype="thing" objectid="205637">
+            <subtypes>
+                <subtype value="boardgame" />
+            </subtypes>
+        </item>
+        <comments>Love it! Better than sliced bread.</comments>
+        <players>
+            <player username="example_user" userid="123" name="Example User" startposition=""
+                color="Blue"
+                score="4" new="0" rating="0" win="1" />
+            <player username="" userid="0" name="Player Two" startposition="" color="Red"
+                score="4" new="0" rating="0" win="1" />
+        </players>
+    </play>
+</plays>

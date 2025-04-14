@@ -1,0 +1,15 @@
+<guild id="1234" name="Example Board Gaming Club" created="Sun, 23 May 2021 16:33:41 +0000"
+    termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <category>group</category>
+    <website>https://www.example.com</website>
+    <manager>example_user</manager>
+    <description>This is a sample gaming guild used for testing purposes.</description>
+    <location>
+        <addr1>Example Community Center</addr1>
+        <addr2>123 Main Street</addr2>
+        <city>Anytown</city>
+        <stateorprovince>State</stateorprovince>
+        <postalcode>12345</postalcode>
+        <country>Country</country>
+    </location>
+</guild>

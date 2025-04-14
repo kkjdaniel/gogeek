@@ -1,0 +1,17 @@
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item id="101001" rank="1">
+        <thumbnail value="https://example.com/images/game1_thumbnail.jpg" />
+        <name value="Example Strategy Game" />
+        <yearpublished value="2025" />
+    </item>
+    <item id="101002" rank="2">
+        <thumbnail value="https://example.com/images/game2_thumbnail.jpg" />
+        <name value="Sample Card Game" />
+        <yearpublished value="2025" />
+    </item>
+    <item id="101003" rank="3">
+        <thumbnail value="https://example.com/images/game3_thumbnail.jpg" />
+        <name value="Generic Board Game" />
+        <yearpublished value="2025" />
+    </item>
+</items>

@@ -1,0 +1,31 @@
+<user id="12345" name="John Doe" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <firstname value="John" />
+    <lastname value="Doe" />
+    <avatarlink value="https://example.com/avatars/avatar_default.png" />
+    <yearregistered value="2003" />
+    <lastlogin value="2025-04-04" />
+    <stateorprovince value="Example State" />
+    <country value="Example Country" />
+    <webaddress value="https://example.com/blog" />
+    <xboxaccount value="" />
+    <wiiaccount value="" />
+    <psnaccount value="" />
+    <battlenetaccount value="" />
+    <steamaccount value="" />
+    <traderating value="0" />
+    <buddies total="5" page="1">
+        <buddy id="1001" name="buddy_one" />
+        <buddy id="1002" name="buddy_two" />
+        <buddy id="1003" name="buddy_three" />
+        <buddy id="1004" name="buddy_four" />
+        <buddy id="1005" name="buddy_five" />
+    </buddies>
+    <guilds total="2" page="1">
+        <guild id="2001" name="Example Guild One" />
+        <guild id="2002" name="Example Guild Two" />
+    </guilds>
+    <top domain="boardgame">
+        <item rank="1" type="thing" id="3001" name="Example Game One" />
+        <item rank="2" type="thing" id="3002" name="Example Game Two" />
+    </top>
+</user>

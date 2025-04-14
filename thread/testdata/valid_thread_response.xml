@@ -1,0 +1,12 @@
+<thread id="123" numarticles="1" link="https://boardgamegeek.com/thread/123"
+    termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <subject>Example Thread Subject</subject>
+    <articles>
+        <article id="456" username="example_user"
+            link="https://boardgamegeek.com/thread/123/article/456#456"
+            postdate="2023-01-15T10:00:00-05:00" editdate="2023-01-15T10:00:00-05:00" numedits="0">
+            <subject>Example Article Subject</subject>
+            <body>This is example content for testing purposes.</body>
+        </article>
+    </articles>
+</thread>
