@@ -1,6 +1,8 @@
 # GoGeek: Go Module for Simplified BoardGameGeek API Integration
 
+[![Go Reference](https://pkg.go.dev/badge/pkg.go.dev/github.com/kkjdaniel/gogeek.svg)](https://pkg.go.dev/pkg.go.dev/github.com/kkjdaniel/gogeek)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kkjdaniel/gogeek)](https://goreportcard.com/report/github.com/kkjdaniel/gogeek)
+[![codecov](https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D)](https://codecov.io/gh/kkjdaniel/gogeek)
 
 GoGeek is a lightweight, easy-to-use Go module designed to streamline interactions with the [BoardGameGeek API](https://boardgamegeek.com/wiki/page/BGG_XML_API2) (XML API2).
 
@@ -46,7 +48,7 @@ func main() {
 
 ## Documentation
 
-For the full documentation please see the GoDoc here.
+For the full documentation please see the [GoDoc here](https://pkg.go.dev/pkg.go.dev/github.com/kkjdaniel/gogeek).
 
 ## Contributing
 
