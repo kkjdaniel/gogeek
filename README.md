@@ -12,8 +12,6 @@ GoGeek is a lightweight, easy-to-use Go module designed to streamline interactio
 - **📄 Data Parsing**: Automatically converts XML responses from the BGG API into Go structs, so you can work with structured data effortlessly.
 - **⚠️ Error Handling**: Robust error handling for common issues like network errors, rate limiting, and unexpected response formats ensures smooth integration.
 
-As of right now this module covers the public API, future work will aim to add coverage to the private API functions such as logging plays and modifying a user collection.
-
 ## Setup
 
 To setup GoGeek, use the following `go get` command:
