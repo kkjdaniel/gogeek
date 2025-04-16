@@ -1,6 +1,6 @@
 # GoGeek: Go Module for Simplified BoardGameGeek API Integration
 
-[![Go Reference](https://pkg.go.dev/badge/pkg.go.dev/github.com/kkjdaniel/gogeek.svg)](https://pkg.go.dev/pkg.go.dev/github.com/kkjdaniel/gogeek)
+[![Go Reference](https://pkg.go.dev/badge/pkg.go.dev/github.com/kkjdaniel/gogeek.svg)](https://pkg.go.dev/github.com/kkjdaniel/gogeek)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kkjdaniel/gogeek)](https://goreportcard.com/report/github.com/kkjdaniel/gogeek)
 [![codecov](https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D)](https://codecov.io/gh/kkjdaniel/gogeek)
 
@@ -48,7 +48,7 @@ func main() {
 
 ## Documentation
 
-For the full documentation please see the [GoDoc here](https://pkg.go.dev/pkg.go.dev/github.com/kkjdaniel/gogeek).
+For the full documentation please see the [GoDoc here](https://pkg.go.dev/github.com/kkjdaniel/gogeek).
 
 ## Contributing
 
