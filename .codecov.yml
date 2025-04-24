@@ -2,7 +2,10 @@ coverage:
   status:
     project:
       default:
-        paths:
-          - "!**/testutils/**"
-          - "!**/testdata/**"
-          - "!**/constants/**"
+        target: auto
+        threshold: 0%
+
+  ignore:
+    - "testutils/.*"
+    - "testdata/.*"
+    - "constants/.*"
