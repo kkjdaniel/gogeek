@@ -44,3 +44,13 @@ func TestQueryGuild(t *testing.T) {
 		t.Errorf("Guild mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.GuildEndpoint + "?id=1234"
+
+	queryWrapper := func(url string) (*Guild, error) {
+		return Query(1234)
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

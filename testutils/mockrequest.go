@@ -40,6 +40,19 @@ func SetupMockResponderWithBody(t *testing.T, url string, body string, statusCod
 		httpmock.NewStringResponder(statusCode, body))
 }
 
+func TestRequestError[T any](t *testing.T, url string, queryFunc func(string) (*T, error)) {
+	t.Run("Handles errors", func(t *testing.T) {
+		defer ActivateMocks()()
+
+		SetupHTTPErrorMock(t, url)
+
+		result, err := queryFunc(url)
+
+		require.Error(t, err, "Function should return an error when request fails")
+		require.Nil(t, result, "Result should be nil when an error occurs")
+	})
+}
+
 func ActivateMocks() func() {
 	httpmock.Activate()
 	return httpmock.DeactivateAndReset

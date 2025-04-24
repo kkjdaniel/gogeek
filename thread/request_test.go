@@ -45,3 +45,13 @@ func TestQueryThread(t *testing.T) {
 		t.Errorf("Thread mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.ThreadEndpoint + "?id=123"
+
+	queryWrapper := func(url string) (*ThreadDetail, error) {
+		return Query(123)
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

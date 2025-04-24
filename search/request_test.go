@@ -76,3 +76,13 @@ func TestQuerySearch(t *testing.T) {
 		t.Errorf("Search results mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.SearchEndpoint + "?query=test"
+
+	queryWrapper := func(url string) (*SearchResults, error) {
+		return Query("test")
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

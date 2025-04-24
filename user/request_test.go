@@ -71,3 +71,13 @@ func TestQueryUser(t *testing.T) {
 		t.Errorf("User mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.UserEndpoint + "?name=johndoe&buddies=1&guilds=1&top=1"
+
+	queryWrapper := func(url string) (*User, error) {
+		return Query("johndoe")
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

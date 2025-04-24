@@ -100,3 +100,13 @@ func TestQueryCollection(t *testing.T) {
 		t.Errorf("Collection mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.CollectionEndpoint + "?username=testuser"
+
+	queryWrapper := func(url string) (*Collection, error) {
+		return Query("testuser")
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

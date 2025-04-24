@@ -141,3 +141,13 @@ func TestQueryThing(t *testing.T) {
 		t.Errorf("Thing mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.ThingEndpoint + "?id=9"
+
+	queryWrapper := func(url string) (*Items, error) {
+		return Query([]int{9})
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

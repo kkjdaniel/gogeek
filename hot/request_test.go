@@ -70,3 +70,13 @@ func TestQueryHotItems(t *testing.T) {
 		t.Errorf("Hot items mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.HotEndpoint + "?type=boardgame"
+
+	queryWrapper := func(url string) (*HotItems, error) {
+		return Query(ItemTypeBoardGame)
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

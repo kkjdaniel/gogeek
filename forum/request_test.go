@@ -61,3 +61,13 @@ func TestFetchForum(t *testing.T) {
 		t.Errorf("Forum mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.ForumEndpoint + "?id=123"
+
+	queryWrapper := func(url string) (*Forum, error) {
+		return Query(123)
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}

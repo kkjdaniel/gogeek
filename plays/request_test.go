@@ -75,3 +75,13 @@ func TestQueryPlays(t *testing.T) {
 		t.Errorf("Plays mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestQuery_Error(t *testing.T) {
+	testURL := constants.PlaysEndpoint + "?username=example_user"
+
+	queryWrapper := func(url string) (*Plays, error) {
+		return Query("example_user")
+	}
+
+	testutils.TestRequestError(t, testURL, queryWrapper)
+}
