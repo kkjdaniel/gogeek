@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/clbanning/mxj"
@@ -29,6 +31,7 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 		}
 
 		// Handle 202 status - request accepted but still processing
+		// https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc12
 		if resp.StatusCode == http.StatusAccepted {
 			resp.Body.Close()
 			if attempt == maxRetries {
@@ -49,22 +52,42 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 			return fmt.Errorf("failed to read response body: %w", err)
 		}
 
-		mv, err := mxj.NewMapXml(body)
-		if err != nil {
-			return fmt.Errorf("failed to parse XML: %w", err)
-		}
+		body = fixMalformedXML(body)
 
-		cleanXML, err := mv.Xml()
-		if err != nil {
-			return fmt.Errorf("failed to regenerate XML: %w", err)
-		}
+		if err := xml.Unmarshal(body, v); err != nil {
+			mv, err := mxj.NewMapXml(body)
+			if err != nil {
+				return fmt.Errorf("failed to parse XML: %w", err)
+			}
 
-		if err := xml.Unmarshal(cleanXML, v); err != nil {
-			return fmt.Errorf("failed to unmarshal XML: %w", err)
+			cleanXML, err := mv.Xml()
+			if err != nil {
+				return fmt.Errorf("failed to regenerate XML: %w", err)
+			}
+
+			if err := xml.Unmarshal(cleanXML, v); err != nil {
+				return fmt.Errorf("failed to unmarshal XML: %w", err)
+			}
 		}
 
 		return nil // Success
 	}
 
 	return fmt.Errorf("failed to get response from BGG API after retries")
+}
+
+func fixMalformedXML(data []byte) []byte {
+	xmlStr := string(data)
+
+	re := regexp.MustCompile(`&(amp|lt|gt|apos|quot|#[0-9]+|#x[0-9a-fA-F]+);`)
+	xmlStr = re.ReplaceAllStringFunc(xmlStr, func(s string) string {
+		return "ENTITY_PLACEHOLDER" + s[1:]
+	})
+	xmlStr = strings.Replace(xmlStr, "&", "&amp;", -1)
+	xmlStr = strings.Replace(xmlStr, "ENTITY_PLACEHOLDER", "&", -1)
+
+	re = regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F]`)
+	xmlStr = re.ReplaceAllString(xmlStr, "")
+
+	return []byte(xmlStr)
 }

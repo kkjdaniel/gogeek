@@ -148,3 +148,58 @@ func TestFetchAndUnmarshal_Status202_ExceedsRetries(t *testing.T) {
 	require.Error(t, err, "FetchAndUnmarshal should fail after exceeding retries")
 	require.Contains(t, err.Error(), "exceeded maximum retries")
 }
+
+func TestFixMalformedXML(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Simple unescaped ampersand",
+			input:    `<item>Dungeons & Dragons</item>`,
+			expected: `<item>Dungeons &amp; Dragons</item>`,
+		},
+		{
+			name:     "Multiple unescaped ampersands",
+			input:    `<game>Ticket to Ride: Rails & Sails & More</game>`,
+			expected: `<game>Ticket to Ride: Rails &amp; Sails &amp; More</game>`,
+		},
+		{
+			name:     "Preserve existing entities",
+			input:    `<description>This game uses &lt;cards&gt; &amp; dice</description>`,
+			expected: `<description>This game uses &lt;cards&gt; &amp; dice</description>`,
+		},
+		{
+			name:     "Preserve numeric entities",
+			input:    `<text>Copyright &#169; 2025 &amp; trademark &#8482;</text>`,
+			expected: `<text>Copyright &#169; 2025 &amp; trademark &#8482;</text>`,
+		},
+		{
+			name:     "Mixed valid and invalid ampersands",
+			input:    `<item>&lt;Dungeons & Dragons&gt; uses dice &amp; cards</item>`,
+			expected: `<item>&lt;Dungeons &amp; Dragons&gt; uses dice &amp; cards</item>`,
+		},
+		{
+			name:     "Remove control characters",
+			input:    "<description>Game\x0Bdescription\x1Fhere</description>",
+			expected: "<description>Gamedescriptionhere</description>",
+		},
+		{
+			name:     "Complex mixed case",
+			input:    "<item>\x0BDungeons & Dragons &#169; &amp; More\x1F</item>",
+			expected: "<item>Dungeons &amp; Dragons &#169; &amp; More</item>",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := string(fixMalformedXML([]byte(tt.input)))
+			require.Equal(t, tt.expected, result, "XML should be fixed correctly")
+
+			var anyXML interface{}
+			err := xml.Unmarshal([]byte(result), &anyXML)
+			require.NoError(t, err, "Fixed XML should be valid")
+		})
+	}
+}
