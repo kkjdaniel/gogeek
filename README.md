@@ -1,4 +1,4 @@
-# GoGeek: Go Module for Simplified BoardGameGeek API Integration
+# GoGeek: Go Module for the BoardGameGeek API
 
 [![Go Reference](https://pkg.go.dev/badge/pkg.go.dev/github.com/kkjdaniel/gogeek.svg)](https://pkg.go.dev/github.com/kkjdaniel/gogeek)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kkjdaniel/gogeek)](https://goreportcard.com/report/github.com/kkjdaniel/gogeek)
