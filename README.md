@@ -46,7 +46,7 @@ func main() {
 
 ## Documentation
 
-For the full documentation please see the [GoDoc here](https://pkg.go.dev/github.com/kkjdaniel/gogeek).
+For the full documentation please see the [GoDoc here](https://pkg.go.dev/github.com/kkjdaniel/gogeek). Details on how to use each query function as well as the interfaces for each of the APIs can be found within their respective packages.
 
 ## Contributing
 
