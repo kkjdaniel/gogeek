@@ -9,8 +9,8 @@ GoGeek is a lightweight, easy-to-use Go module designed to streamline interactio
 ## Key Features
 
 - **🔄 Simple Request Handling**: GoGeek abstracts the BGG API request process, allowing you to focus on utilising the data rather than managing HTTP requests.
-- **📄 Data Parsing**: Automatically converts XML responses from the BGG API into Go structs, so you can work with structured data effortlessly.
-- **⚠️ Error Handling**: Robust error handling for common issues like network errors, rate limiting, and unexpected response formats ensures smooth integration.
+- **📄 Data Parsing**: Automatically converts and normalises XML responses from the BGG API into Go structs, so you can work with structured data effortlessly.
+- **⚠️ Error Handling**: Robust error handling for common issues like network errors, rate limiting, queued requests and unexpected response formats.
 
 ## Setup
 

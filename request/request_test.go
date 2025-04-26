@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/kkjdaniel/gogeek/testutils"
 	"github.com/stretchr/testify/require"
@@ -87,4 +88,63 @@ func TestFetchAndUnmarshal_UnmarshalError(t *testing.T) {
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when unmarshaling fails")
 	require.Contains(t, err.Error(), "failed to unmarshal XML")
+}
+
+func TestFetchAndUnmarshal_Status202_EventualSuccess(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	originalRetryDelay := retryDelay
+	retryDelay = 100 * time.Millisecond
+	defer func() { retryDelay = originalRetryDelay }()
+
+	type TestXML struct {
+		XMLName xml.Name `xml:"forum"`
+		ID      int      `xml:"id,attr"`
+		Title   string   `xml:"title"`
+	}
+
+	testURL := "https://example.com/api/queued-request"
+	mockDataFileValid := `testdata/valid.xml`
+
+	testutils.SetupSequentialResponders(t, testURL, []testutils.MockResponse{
+		{StatusCode: http.StatusAccepted, Body: ""},
+		{StatusCode: http.StatusAccepted, Body: ""},
+		{StatusCode: http.StatusOK, FilePath: mockDataFileValid},
+	})
+
+	var result TestXML
+	err := FetchAndUnmarshal(testURL, &result)
+
+	require.NoError(t, err, "FetchAndUnmarshal should eventually succeed after 202 responses")
+	require.Equal(t, 123, result.ID, "ID should match expected value")
+	require.Equal(t, "Example Forum", result.Title, "Title should match expected value")
+}
+
+func TestFetchAndUnmarshal_Status202_ExceedsRetries(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	// Override maxRetries and retryDelay for testing
+	originalMaxRetries := maxRetries
+	originalRetryDelay := retryDelay
+	maxRetries = 3
+	retryDelay = 100 * time.Millisecond
+	defer func() {
+		maxRetries = originalMaxRetries
+		retryDelay = originalRetryDelay
+	}()
+
+	testURL := "https://example.com/api/always-queued"
+
+	// Setup responders that always return 202
+	responses := make([]testutils.MockResponse, maxRetries+1)
+	for i := range responses {
+		responses[i] = testutils.MockResponse{StatusCode: http.StatusAccepted, Body: ""}
+	}
+	testutils.SetupSequentialResponders(t, testURL, responses)
+
+	var result struct{}
+	err := FetchAndUnmarshal(testURL, &result)
+
+	require.Error(t, err, "FetchAndUnmarshal should fail after exceeding retries")
+	require.Contains(t, err.Error(), "exceeded maximum retries")
 }

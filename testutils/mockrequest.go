@@ -6,11 +6,57 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 )
+
+type MockResponse struct {
+	StatusCode int
+	Body       string
+	FilePath   string
+	Headers    map[string]string
+}
+
+func SetupSequentialResponders(t *testing.T, url string, responses []MockResponse) {
+	var mu sync.Mutex
+	callCount := 0
+
+	httpmock.RegisterResponder("GET", url,
+		func(req *http.Request) (*http.Response, error) {
+			mu.Lock()
+			defer mu.Unlock()
+
+			if callCount >= len(responses) {
+				return httpmock.NewStringResponse(500, "No more mock responses configured"), nil
+			}
+
+			response := responses[callCount]
+			callCount++
+
+			var body string
+			if response.FilePath != "" {
+				data, err := os.ReadFile(response.FilePath)
+				if err != nil {
+					t.Fatalf("Failed to read mock data file %s: %v", response.FilePath, err)
+				}
+				body = string(data)
+			} else {
+				body = response.Body
+			}
+
+			resp := httpmock.NewStringResponse(response.StatusCode, body)
+
+			for key, value := range response.Headers {
+				resp.Header.Add(key, value)
+			}
+
+			return resp, nil
+		},
+	)
+}
 
 func SetupMockResponder(t *testing.T, url string, mockDataPath string) []byte {
 	mockData, err := os.ReadFile(mockDataPath)
