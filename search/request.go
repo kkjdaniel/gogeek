@@ -1,7 +1,7 @@
 package search
 
 import (
-	"fmt"
+	"net/url"
 
 	"github.com/kkjdaniel/gogeek/constants"
 	"github.com/kkjdaniel/gogeek/request"
@@ -14,6 +14,7 @@ import (
 //
 // Parameters:
 //   - query: A string containing the search terms to find matching board games
+//   - exact: Optional boolean parameter to enable exact matching
 //
 // Returns:
 //   - *SearchResults: A pointer to a SearchResults struct containing the search results
@@ -21,17 +22,23 @@ import (
 //
 // Example:
 //
+//	// Regular search
 //	results, err := search.Query("catan")
-//	if err != nil {
-//	    log.Fatalf("Failed to search for games: %v", err)
-//	}
-//	fmt.Printf("Found %d results for 'catan'\n", results.Total)
-func Query(query string) (*SearchResults, error) {
-	url := fmt.Sprintf(constants.SearchEndpoint+"?query=%s", query)
+//
+//	// Exact match search
+//	exactResults, err := search.Query("catan", true)
+func Query(query string, exact ...bool) (*SearchResults, error) {
+	params := url.Values{}
+	params.Set("query", query)
+
+	if len(exact) > 0 && exact[0] {
+		params.Set("exact", "1")
+	}
+
+	requestURL := constants.SearchEndpoint + "?" + params.Encode()
 
 	var searchResults SearchResults
-
-	if err := request.FetchAndUnmarshal(url, &searchResults); err != nil {
+	if err := request.FetchAndUnmarshal(requestURL, &searchResults); err != nil {
 		return nil, err
 	}
 

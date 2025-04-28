@@ -15,7 +15,7 @@ const mockDataFileValid = "testdata/valid_thing_response.xml"
 func TestQueryThing(t *testing.T) {
 	defer testutils.ActivateMocks()()
 
-	url := constants.ThingEndpoint + "?id=9"
+	url := constants.ThingEndpoint + "?id=9&stats=1"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
 	thing, err := Query([]int{9})

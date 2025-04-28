@@ -3,6 +3,7 @@ package request
 import (
 	"encoding/xml"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"regexp"
@@ -79,14 +80,39 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 func fixMalformedXML(data []byte) []byte {
 	xmlStr := string(data)
 
-	re := regexp.MustCompile(`&(amp|lt|gt|apos|quot|#[0-9]+|#x[0-9a-fA-F]+);`)
-	xmlStr = re.ReplaceAllStringFunc(xmlStr, func(s string) string {
+	cdataRegex := regexp.MustCompile(`<!\[CDATA\[(.*?)\]\]>`)
+	cdataSections := make(map[string]string)
+	xmlStr = cdataRegex.ReplaceAllStringFunc(xmlStr, func(match string) string {
+		placeholder := fmt.Sprintf("CDATA_PLACEHOLDER_%d", len(cdataSections))
+		cdataSections[placeholder] = match
+		return placeholder
+	})
+
+	entityRegex := regexp.MustCompile(`&(amp|lt|gt|apos|quot|#[0-9]+|#x[0-9a-fA-F]+);`)
+	xmlStr = entityRegex.ReplaceAllStringFunc(xmlStr, func(s string) string {
 		return "ENTITY_PLACEHOLDER" + s[1:]
 	})
+
+	htmlEntityRegex := regexp.MustCompile(`&([a-zA-Z]+);`)
+	xmlStr = htmlEntityRegex.ReplaceAllStringFunc(xmlStr, func(s string) string {
+
+		unescaped := html.UnescapeString(s)
+		if unescaped != s {
+
+			return unescaped
+		}
+		return s
+	})
+
 	xmlStr = strings.Replace(xmlStr, "&", "&amp;", -1)
+
 	xmlStr = strings.Replace(xmlStr, "ENTITY_PLACEHOLDER", "&", -1)
 
-	re = regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F]`)
+	for placeholder, cdata := range cdataSections {
+		xmlStr = strings.Replace(xmlStr, placeholder, cdata, -1)
+	}
+
+	re := regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F]`)
 	xmlStr = re.ReplaceAllString(xmlStr, "")
 
 	return []byte(xmlStr)

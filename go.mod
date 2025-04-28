@@ -3,6 +3,7 @@ module github.com/kkjdaniel/gogeek
 go 1.21.3
 
 require (
+	github.com/beevik/etree v1.5.1
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

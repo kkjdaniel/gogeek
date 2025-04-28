@@ -123,7 +123,6 @@ func TestFetchAndUnmarshal_Status202_EventualSuccess(t *testing.T) {
 func TestFetchAndUnmarshal_Status202_ExceedsRetries(t *testing.T) {
 	defer testutils.ActivateMocks()()
 
-	// Override maxRetries and retryDelay for testing
 	originalMaxRetries := maxRetries
 	originalRetryDelay := retryDelay
 	maxRetries = 3
@@ -135,7 +134,6 @@ func TestFetchAndUnmarshal_Status202_ExceedsRetries(t *testing.T) {
 
 	testURL := "https://example.com/api/always-queued"
 
-	// Setup responders that always return 202
 	responses := make([]testutils.MockResponse, maxRetries+1)
 	for i := range responses {
 		responses[i] = testutils.MockResponse{StatusCode: http.StatusAccepted, Body: ""}

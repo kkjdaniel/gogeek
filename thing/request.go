@@ -29,6 +29,14 @@ import (
 //	}
 //	fmt.Printf("Retrieved details for %d games\n", len(details.Items))
 func Query(ids []int) (*Items, error) {
+	if len(ids) == 0 {
+		return nil, fmt.Errorf("no IDs provided")
+	}
+
+	if len(ids) > 20 {
+		return nil, fmt.Errorf("too many IDs provided, maximum is 20")
+	}
+
 	idStrings := make([]string, len(ids))
 	for i, id := range ids {
 		idStrings[i] = fmt.Sprintf("%d", id)
