@@ -8,6 +8,13 @@ import (
 	"github.com/kkjdaniel/gogeek/request"
 )
 
+var (
+	// ErrTooManyIDs is returned when more than 20 IDs are provided for a query.
+	ErrTooManyIDs = fmt.Errorf("too many IDs provided, maximum is 20")
+	// ErrNoIDs is returned when no IDs are provided for a query.
+	ErrNoIDs = fmt.Errorf("no IDs provided")
+)
+
 // Query retrieves detailed information about one or more board games from the BoardGameGeek API.
 //
 // The function accepts a slice of BGG item IDs and returns a structured representation
@@ -30,11 +37,11 @@ import (
 //	fmt.Printf("Retrieved details for %d games\n", len(details.Items))
 func Query(ids []int) (*Items, error) {
 	if len(ids) == 0 {
-		return nil, fmt.Errorf("no IDs provided")
+		return nil, ErrNoIDs
 	}
 
 	if len(ids) > 20 {
-		return nil, fmt.Errorf("too many IDs provided, maximum is 20")
+		return nil, ErrTooManyIDs
 	}
 
 	idStrings := make([]string, len(ids))

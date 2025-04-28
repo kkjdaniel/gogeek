@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/xml"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
@@ -14,9 +15,8 @@ func TestFetchAndUnmarshal_Success(t *testing.T) {
 	defer testutils.ActivateMocks()()
 
 	type TestXML struct {
-		XMLName xml.Name `xml:"forum"`
-		ID      int      `xml:"id,attr"`
-		Title   string   `xml:"title"`
+		ID    int    `xml:"id,attr"`
+		Title string `xml:"title"`
 	}
 
 	testURL := "https://example.com/api/test"
@@ -41,7 +41,7 @@ func TestFetchAndUnmarshal_HTTPError(t *testing.T) {
 	err := FetchAndUnmarshal(testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when HTTP request fails")
-	require.Contains(t, err.Error(), "failed to fetch data from BGG API")
+	require.True(t, errors.Is(err, ErrHTTPError), "Error should be of type ErrHTTPError")
 }
 
 func TestFetchAndUnmarshal_BadStatusCode(t *testing.T) {
@@ -54,7 +54,8 @@ func TestFetchAndUnmarshal_BadStatusCode(t *testing.T) {
 	err := FetchAndUnmarshal(testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when status is not 200")
-	require.Contains(t, err.Error(), "unexpected status code: 404")
+	require.True(t, errors.Is(err, ErrUnexpectedStatusCode), "Error should be of type ErrUnexpectedStatusCode")
+	require.Contains(t, err.Error(), "404", "Error should include the status code")
 }
 
 func TestFetchAndUnmarshal_InvalidXML(t *testing.T) {
@@ -68,7 +69,7 @@ func TestFetchAndUnmarshal_InvalidXML(t *testing.T) {
 	err := FetchAndUnmarshal(testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error with invalid XML")
-	require.Contains(t, err.Error(), "failed to parse XML")
+	require.True(t, errors.Is(err, ErrXMLParseError), "Error should be of type ErrXMLParseError")
 }
 
 func TestFetchAndUnmarshal_UnmarshalError(t *testing.T) {
@@ -87,7 +88,7 @@ func TestFetchAndUnmarshal_UnmarshalError(t *testing.T) {
 	err := FetchAndUnmarshal(testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when unmarshaling fails")
-	require.Contains(t, err.Error(), "failed to unmarshal XML")
+	require.True(t, errors.Is(err, ErrUnmarshalError), "Error should be of type ErrUnmarshalError")
 }
 
 func TestFetchAndUnmarshal_Status202_EventualSuccess(t *testing.T) {
@@ -144,6 +145,7 @@ func TestFetchAndUnmarshal_Status202_ExceedsRetries(t *testing.T) {
 	err := FetchAndUnmarshal(testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should fail after exceeding retries")
+	require.True(t, errors.Is(err, ErrMaxRetriesExceeded), "Error should be of type ErrMaxRetriesExceeded")
 	require.Contains(t, err.Error(), "exceeded maximum retries")
 }
 

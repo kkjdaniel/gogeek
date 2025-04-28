@@ -22,13 +22,30 @@ var (
 	retryDelay = 3 * time.Second
 )
 
+var (
+	// ErrEmptyResponse is returned when the response body is empty
+	ErrEmptyResponse = fmt.Errorf("empty response body")
+	// ErrHTTPError is returned when the HTTP request fails
+	ErrHTTPError = fmt.Errorf("HTTP request failed")
+	// ErrUnexpectedStatusCode is returned when the HTTP status code is not 200
+	ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
+	// ErrMaxRetriesExceeded is returned when the maximum number of retries is exceeded
+	ErrMaxRetriesExceeded = fmt.Errorf("exceeded maximum retries while waiting for BGG to process request")
+	// ErrUnmarshalError is returned when the XML response cannot be unmarshalled
+	ErrUnmarshalError = fmt.Errorf("failed to unmarshal XML response")
+	// ErrRegenerateError is returned when the XML response cannot be regenerated
+	ErrRegenerateError = fmt.Errorf("failed to regenerate XML response")
+	// ErrXMLParseError is returned when the XML response cannot be parsed
+	ErrXMLParseError = fmt.Errorf("failed to parse XML response")
+)
+
 func FetchAndUnmarshal(url string, v interface{}) error {
 	for attempt := 0; attempt <= maxRetries; attempt++ {
 		limiter.Take()
 
 		resp, err := http.Get(url)
 		if err != nil {
-			return fmt.Errorf("failed to fetch data from BGG API: %w", err)
+			return ErrHTTPError
 		}
 
 		// Handle 202 status - request accepted but still processing
@@ -36,7 +53,7 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 		if resp.StatusCode == http.StatusAccepted {
 			resp.Body.Close()
 			if attempt == maxRetries {
-				return fmt.Errorf("exceeded maximum retries while waiting for BGG to process request")
+				return ErrMaxRetriesExceeded
 			}
 			time.Sleep(retryDelay)
 			continue
@@ -45,12 +62,12 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+			return fmt.Errorf("%w: %d", ErrUnexpectedStatusCode, resp.StatusCode)
 		}
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("failed to read response body: %w", err)
+			return ErrEmptyResponse
 		}
 
 		body = fixMalformedXML(body)
@@ -58,16 +75,16 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 		if err := xml.Unmarshal(body, v); err != nil {
 			mv, err := mxj.NewMapXml(body)
 			if err != nil {
-				return fmt.Errorf("failed to parse XML: %w", err)
+				return ErrXMLParseError
 			}
 
 			cleanXML, err := mv.Xml()
 			if err != nil {
-				return fmt.Errorf("failed to regenerate XML: %w", err)
+				return ErrRegenerateError
 			}
 
 			if err := xml.Unmarshal(cleanXML, v); err != nil {
-				return fmt.Errorf("failed to unmarshal XML: %w", err)
+				return ErrUnmarshalError
 			}
 		}
 

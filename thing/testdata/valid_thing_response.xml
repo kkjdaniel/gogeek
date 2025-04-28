@@ -84,5 +84,29 @@
         <link type="boardgamepublisher" id="6001" value="Publisher One" />
         <link type="boardgamepublisher" id="6002" value="Publisher Two" />
         <link type="boardgamepublisher" id="6003" value="Publisher Three" />
+        <statistics page="1">
+            <ratings>
+                <usersrated value="3929" />
+                <average value="7.28028" />
+                <bayesaverage value="6.59011" />
+                <ranks>
+                    <rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank"
+                        value="1071" bayesaverage="6.59011" />
+                    <rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank"
+                        value="49" bayesaverage="6.85912" />
+                    <rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank"
+                        value="276" bayesaverage="6.72714" />
+                </ranks>
+                <stddev value="1.41125" />
+                <median value="0" />
+                <owned value="8727" />
+                <trading value="41" />
+                <wanting value="220" />
+                <wishing value="1653" />
+                <numcomments value="718" />
+                <numweights value="91" />
+                <averageweight value="1.0989" />
+            </ratings>
+        </statistics>
     </item>
 </items>

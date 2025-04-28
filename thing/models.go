@@ -9,13 +9,13 @@ type Item struct {
 	ID            int           `xml:"id,attr"`
 	Name          []Name        `xml:"name"`
 	Description   string        `xml:"description"`
-	YearPublished YearPublished `xml:"yearpublished"`
-	MinPlayers    Value         `xml:"minplayers"`
-	MaxPlayers    Value         `xml:"maxplayers"`
-	PlayingTime   Value         `xml:"playingtime"`
-	MinPlayTime   Value         `xml:"minplaytime"`
-	MaxPlayTime   Value         `xml:"maxplaytime"`
-	MinAge        Value         `xml:"minage"`
+	YearPublished IntValue      `xml:"yearpublished"`
+	MinPlayers    IntValue      `xml:"minplayers"`
+	MaxPlayers    IntValue      `xml:"maxplayers"`
+	PlayingTime   IntValue      `xml:"playingtime"`
+	MinPlayTime   IntValue      `xml:"minplaytime"`
+	MaxPlayTime   IntValue      `xml:"maxplaytime"`
+	MinAge        IntValue      `xml:"minage"`
 	Thumbnail     string        `xml:"thumbnail"`
 	Image         string        `xml:"image"`
 	Links         []Link        `xml:"link"`
@@ -30,12 +30,16 @@ type Name struct {
 	Value     string `xml:"value,attr"`
 }
 
-type YearPublished struct {
+type IntValue struct {
 	Value int `xml:"value,attr"`
 }
 
-type Value struct {
-	Value int `xml:"value,attr"`
+type FloatValue struct {
+	Value float64 `xml:"value,attr"`
+}
+
+type StringValue struct {
+	Value string `xml:"value,attr"`
 }
 
 type Link struct {
@@ -45,10 +49,19 @@ type Link struct {
 }
 
 type Statistics struct {
-	UsersRated    Value   `xml:"usersrated"`
-	AverageRating float64 `xml:"average"`
-	BayesAverage  float64 `xml:"bayesaverage"`
-	Rank          []Rank  `xml:"ranks>rank"`
+	UsersRated    IntValue   `xml:"usersrated"`
+	Average       FloatValue `xml:"average"`
+	BayesAverage  FloatValue `xml:"bayesaverage"`
+	Ranks         []Rank     `xml:"ranks>rank"`
+	StdDev        FloatValue `xml:"stddev"`
+	Median        IntValue   `xml:"median"`
+	Owned         IntValue   `xml:"owned"`
+	Trading       IntValue   `xml:"trading"`
+	Wanting       IntValue   `xml:"wanting"`
+	Wishing       IntValue   `xml:"wishing"`
+	NumComments   IntValue   `xml:"numcomments"`
+	NumWeights    IntValue   `xml:"numweights"`
+	AverageWeight FloatValue `xml:"averageweight"`
 }
 
 type Rank struct {
