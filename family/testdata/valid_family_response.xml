@@ -1,0 +1,16 @@
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item type="boardgamefamily" id="12">
+        <thumbnail>https://example.com/images/family_thumbnail.jpg</thumbnail>
+        <image>https://example.com/images/family_full.jpg</image>
+        <name type="primary" sortindex="1" value="Sample Game Series" />
+        <description>This is an example description for a board game family.</description>
+        <link type="boardgamefamily" id="101" value="Sample Game 1" inbound="true" />
+        <link type="boardgamefamily" id="102" value="Sample Game 2" inbound="true" />
+        <link type="boardgamefamily" id="103" value="Sample Game 3" inbound="true" />
+        <link type="boardgamefamily" id="104" value="Sample Game 4" inbound="true" />
+        <link type="boardgamefamily" id="105" value="Sample Game 5" inbound="true" />
+        <link type="boardgamefamily" id="106" value="Sample Game 6" inbound="true" />
+        <link type="boardgamefamily" id="107" value="Sample Game 7" inbound="true" />
+        <link type="boardgamefamily" id="108" value="Sample Game 8" inbound="true" />
+    </item>
+</items>

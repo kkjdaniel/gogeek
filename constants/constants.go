@@ -6,6 +6,7 @@ const (
 
 const (
 	CollectionEndpoint = BGGBaseURL + "/collection"
+	FamilyEndpoint     = BGGBaseURL + "/family"
 	ForumEndpoint      = BGGBaseURL + "/forum"
 	ForumListEndpoint  = BGGBaseURL + "/forumlist"
 	GuildEndpoint      = BGGBaseURL + "/guild"
