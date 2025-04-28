@@ -22,27 +22,42 @@ go get github.com/kkjdaniel/gogeek
 
 ## Usage
 
-Getting started with GoGeek is easy. Here’s a quick example to fetch details about a specific board game:
+Getting started with GoGeek is easy. Here’s a quick example to fetch details about specific board games:
 
 ```go
 package main
 
 import (
-    "fmt"
-    "log"
-    "github.com/kkjdaniel/gogeek/thing"
+	"fmt"
+	"log"
+
+	"github.com/kkjdaniel/gogeek/thing"
 )
 
 func main() {
-	// Catan
-	game, err := thing.Query([]int{9})
+	games, err := thing.Query([]int{13, 12, 3})
 	if err != nil {
 		log.Fatal(err)
 	}
-	catan := game.Items[0]
-	fmt.Printf("Name: %s\nYear Published: %d\nRating: %.2f\n", catan.Name[0].Value, catan.YearPublished.Value, catan.Statistics.AverageRating)
+
+	for _, game := range games.Items {
+		fmt.Printf("Name: %s\nYear Published: %d\n", game.Name[0].Value, game.YearPublished.Value)
+	}
 }
 ```
+
+```
+Name: CATAN
+Year Published: 1995
+Name: Ra
+Year Published: 1999
+Name: Samurai
+Year Published: 1998
+```
+
+The `thing` query allows you to fetch details about a specific or multiple board games by BGG ID.
+
+_Note: There is a query limit of 20 IDs per query due to restrictions of the BGG API. If you wish to fetch multiple games you will need to batch your requests._
 
 ## Documentation
 

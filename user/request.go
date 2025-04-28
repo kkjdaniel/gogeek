@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"net/url" // Add this import for URL encoding
 
 	"github.com/kkjdaniel/gogeek/constants"
 	"github.com/kkjdaniel/gogeek/request"
@@ -11,7 +12,8 @@ import (
 //
 // The function accepts a BGG username and returns a structured representation
 // of the user's profile including their basic information, buddies list,
-// guild memberships, and top rated items.
+// guild memberships, and top rated items. Usernames with spaces or special
+// characters are automatically URL-encoded.
 //
 // Parameters:
 //   - username: A string containing the BGG username to retrieve information for
@@ -22,17 +24,20 @@ import (
 //
 // Example:
 //
-//	userProfile, err := user.Query("exampleuser")
+//	userProfile, err := user.Query("example user")
 //	if err != nil {
 //	    log.Fatalf("Failed to retrieve user profile: %v", err)
 //	}
 //	fmt.Printf("User: %s (member since %s)\n", userProfile.Name, userProfile.YearRegistered)
 func Query(username string) (*User, error) {
-	url := fmt.Sprintf(constants.UserEndpoint+"?name=%s&buddies=1&guilds=1&top=1", username)
+	escapedUsername := url.QueryEscape(username)
+
+	requestURL := fmt.Sprintf("%s?name=%s&buddies=1&guilds=1&top=1",
+		constants.UserEndpoint, escapedUsername)
 
 	var user User
 
-	if err := request.FetchAndUnmarshal(url, &user); err != nil {
+	if err := request.FetchAndUnmarshal(requestURL, &user); err != nil {
 		return nil, err
 	}
 
