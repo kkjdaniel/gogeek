@@ -35,7 +35,7 @@ func Query(ids []int) (*Items, error) {
 	}
 	idParam := strings.Join(idStrings, ",")
 
-	url := fmt.Sprintf("%s?id=%s", constants.ThingEndpoint, idParam)
+	url := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, idParam)
 
 	var thing Items
 	if err := request.FetchAndUnmarshal(url, &thing); err != nil {
