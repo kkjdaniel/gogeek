@@ -63,14 +63,11 @@ type Statistics struct {
 	NumWeights    IntValue   `xml:"numweights"`
 	AverageWeight FloatValue `xml:"averageweight"`
 }
-
 type Rank struct {
-	Type         string  `xml:"type,attr"`
-	ID           int     `xml:"id,attr"`
-	Name         string  `xml:"name,attr"`
-	Friendly     string  `xml:"friendlyname,attr"`
-	Value        int     `xml:"value,attr"`
-	BayesAverage float64 `xml:"bayesaverage,attr"`
+	Type     string `xml:"type,attr"`
+	ID       int    `xml:"id,attr"`
+	Name     string `xml:"name,attr"`
+	Friendly string `xml:"friendlyname,attr"`
 }
 
 type Poll struct {

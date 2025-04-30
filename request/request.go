@@ -15,7 +15,7 @@ import (
 )
 
 // https://boardgamegeek.com/thread/2388502/updated-api-rate-limit-recommendation
-var limiter = ratelimit.New(2, ratelimit.WithoutSlack)
+var limiter = ratelimit.New(1, ratelimit.Per(2*time.Second))
 
 var (
 	maxRetries = 5
@@ -84,7 +84,8 @@ func FetchAndUnmarshal(url string, v interface{}) error {
 			}
 
 			if err := xml.Unmarshal(cleanXML, v); err != nil {
-				return ErrUnmarshalError
+				typeName := fmt.Sprintf("%T", v)
+				return fmt.Errorf("%w: failed to unmarshal into %s: %v", ErrUnmarshalError, typeName, err)
 			}
 		}
 

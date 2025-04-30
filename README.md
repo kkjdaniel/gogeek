@@ -1,3 +1,5 @@
+![GoGeek Logo](logo.png)
+
 # GoGeek: Go Module for the BoardGameGeek API
 
 [![Go Reference](https://pkg.go.dev/badge/pkg.go.dev/github.com/kkjdaniel/gogeek.svg)](https://pkg.go.dev/github.com/kkjdaniel/gogeek)
