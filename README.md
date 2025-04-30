@@ -1,4 +1,4 @@
-![GoGeek Logo](logo.png)
+<img src="logo.png" alt="GoGeek Logo" width="380" />
 
 # GoGeek: Go Module for the BoardGameGeek API
 
