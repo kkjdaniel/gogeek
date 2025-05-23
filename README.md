@@ -1,4 +1,6 @@
-<img src="logo.png" alt="GoGeek Logo" width="380" />
+<p align="center">
+  <img src="gogeek-logo.png" width="250" alt="GoGeek Logo">
+</p>
 
 # GoGeek: Go Module for the BoardGameGeek API
 
