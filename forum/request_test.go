@@ -62,6 +62,18 @@ func TestFetchForum(t *testing.T) {
 	}
 }
 
+func TestFetchForum_WithPage(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	url := constants.ForumEndpoint + "?id=123&page=2"
+	testutils.SetupMockResponder(t, url, mockDataFileValid)
+
+	forum, err := Query(123, WithPage(2))
+	require.NoError(t, err, "FetchForum with page should not return an error")
+	require.NotNil(t, forum, "Forum should not be nil")
+	require.Equal(t, 123, forum.ID)
+}
+
 func TestQuery_Error(t *testing.T) {
 	testURL := constants.ForumEndpoint + "?id=123"
 
