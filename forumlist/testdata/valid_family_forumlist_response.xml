@@ -1,0 +1,14 @@
+<forums type="family" id="12" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <forum id="1001" groupid="0" title="General Discussion" noposting="0" 
+        description="General discussion about this game family." 
+        numthreads="25" numposts="187" 
+        lastpostdate="Mon, 15 Jan 2025 09:30:00 +0000" />
+    <forum id="1002" groupid="0" title="Comparisons" noposting="0" 
+        description="Compare games within this family." 
+        numthreads="12" numposts="89" 
+        lastpostdate="Thu, 10 Jan 2025 14:22:30 +0000" />
+    <forum id="1003" groupid="0" title="Recommendations" noposting="0" 
+        description="Get recommendations for games in this family." 
+        numthreads="8" numposts="42" 
+        lastpostdate="Sun, 07 Jan 2025 18:45:00 +0000" />
+</forums>

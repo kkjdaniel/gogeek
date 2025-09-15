@@ -1,0 +1,26 @@
+<forums type="thing" id="174430" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <forum id="0" groupid="0" title="Reviews" noposting="0" 
+        description="Post your game reviews in this forum." 
+        numthreads="84" numposts="139" 
+        lastpostdate="Wed, 03 Jan 2024 16:27:59 +0000" />
+    <forum id="1" groupid="0" title="Sessions" noposting="0" 
+        description="Post your session reports here." 
+        numthreads="453" numposts="1098" 
+        lastpostdate="Mon, 20 Jan 2025 04:19:24 +0000" />
+    <forum id="2" groupid="0" title="General" noposting="0" 
+        description="Discuss this game and organize play sessions." 
+        numthreads="2459" numposts="23986" 
+        lastpostdate="Mon, 27 Jan 2025 17:18:42 +0000" />
+    <forum id="65" groupid="0" title="Rules" noposting="0" 
+        description="Post your rules questions here." 
+        numthreads="1072" numposts="6456" 
+        lastpostdate="Mon, 27 Jan 2025 17:18:31 +0000" />
+    <forum id="67" groupid="1" title="Play By Forum" noposting="0" 
+        description="PBF Games of Gloomhaven" 
+        numthreads="216" numposts="90089" 
+        lastpostdate="Mon, 27 Jan 2025 20:56:59 +0000" />
+    <forum id="69" groupid="0" title="Variants" noposting="0" 
+        description="Post your variants here." 
+        numthreads="146" numposts="835" 
+        lastpostdate="Sun, 26 Jan 2025 06:18:42 +0000" />
+</forums>
