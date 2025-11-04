@@ -1,10 +1,12 @@
 package user
 
 import (
+
+	"github.com/kkjdaniel/gogeek/v2"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +20,8 @@ func TestQueryUser(t *testing.T) {
 	url := constants.UserEndpoint + "?name=johndoe&buddies=1&guilds=1&top=1"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	user, err := Query("johndoe")
+	client := gogeek.NewClient()
+	user, err := Query(client, "johndoe")
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, user, "User should not be nil")
 
@@ -76,7 +79,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.UserEndpoint + "?name=johndoe&buddies=1&guilds=1&top=1"
 
 	queryWrapper := func(url string) (*User, error) {
-		return Query("johndoe")
+		client := gogeek.NewClient()
+		return Query(client, "johndoe")
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

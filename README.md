@@ -26,7 +26,9 @@ go get github.com/kkjdaniel/gogeek
 
 ## Usage
 
-Getting started with GoGeek is easy. Here’s a quick example to fetch details about specific board games:
+### Basic Usage
+
+Getting started with GoGeek is easy. First, create a client, then use it to make API requests:
 
 ```go
 package main
@@ -35,11 +37,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/kkjdaniel/gogeek"
 	"github.com/kkjdaniel/gogeek/thing"
 )
 
 func main() {
-	games, err := thing.Query([]int{13, 12, 3})
+	// Create a client
+	client := gogeek.NewClient()
+
+	// Query board games by BGG ID
+	games, err := thing.Query(client, []int{13, 12, 3})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,9 +66,36 @@ Name: Samurai
 Year Published: 1998
 ```
 
-The `thing` query allows you to fetch details about a specific or multiple board games by BGG ID.
+### Authentication
 
-_Note: There is a query limit of 20 IDs per query due to restrictions of the BGG API. If you wish to fetch multiple games you will need to batch your requests._
+Most BGG endpoints now require authorisation. GoGeek supports multiple authentication methods.
+
+**API Key Authentication** (recommended):
+
+```go
+client := gogeek.NewClient(gogeek.WithAPIKey("your-api-key"))
+collection, err := collection.Query(client, "username")
+```
+
+Note: To get an API key you can request one via the [application form here.](https://boardgamegeek.com/applications)
+
+**Cookie Authentication**:
+
+```go
+cookie := "bggusername=user; bggpassword=pass; SessionID=xyz"
+client := gogeek.NewClient(gogeek.WithCookie(cookie))
+user, err := user.Query(client, "username")
+```
+
+### Rate Limiting
+
+All clients automatically enforce rate limiting of **2 requests per second** to comply with BoardGameGeek's API guidelines.
+
+### Notes
+
+- The `thing` query allows you to fetch details about specific board games by BGG ID
+- There is a query limit of 20 IDs per query due to BGG API restrictions
+- If you need to fetch multiple games, batch your requests accordingly
 
 ## Documentation
 

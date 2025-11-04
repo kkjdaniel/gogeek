@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 const (
@@ -22,6 +23,7 @@ var ErrInvalidForumListType = errors.New("invalid forum list type")
 // descriptions, and metadata such as thread and post counts.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - id: An integer ID corresponding to a thing or family in the BGG database
 //   - forumListType: A string indicating the type of entry to query.
 //     Must be one of the defined constants: forumlist.Thing or forumlist.Family
@@ -33,12 +35,13 @@ var ErrInvalidForumListType = errors.New("invalid forum list type")
 //
 // Example:
 //
-//	forums, err := forumlist.Query(174430, forumlist.Thing)
+//	client := gogeek.NewClient()
+//	forums, err := forumlist.Query(client, 174430, forumlist.Thing)
 //	if err != nil {
 //	    log.Fatalf("Failed to get forum list: %v", err)
 //	}
 //	fmt.Printf("Found %d forums for this game\n", len(forums.Forums))
-func Query(id int, forumListType string) (*ForumList, error) {
+func Query(client *gogeek.Client, id int, forumListType string) (*ForumList, error) {
 	if !isValidForumListType(forumListType) {
 		return nil, fmt.Errorf("%w: %s (must be one of: %s, %s)",
 			ErrInvalidForumListType, forumListType, Thing, Family)
@@ -48,7 +51,7 @@ func Query(id int, forumListType string) (*ForumList, error) {
 
 	var forumList ForumList
 
-	if err := request.FetchAndUnmarshal(url, &forumList); err != nil {
+	if err := request.FetchAndUnmarshal(client, url, &forumList); err != nil {
 		return nil, err
 	}
 

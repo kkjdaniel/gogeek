@@ -3,8 +3,9 @@ package family
 import (
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,8 @@ func TestQueryFamily(t *testing.T) {
 	url := constants.FamilyEndpoint + "?id=12&type=" + BoardGameFamily
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	family, err := Query(12, BoardGameFamily)
+	client := gogeek.NewClient()
+	family, err := Query(client, 12, BoardGameFamily)
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, family, "Family should not be nil")
 
@@ -58,7 +60,8 @@ func TestQueryFamily_Error(t *testing.T) {
 	testURL := constants.FamilyEndpoint + "?id=12"
 
 	queryWrapper := func(url string) (*Family, error) {
-		return Query(12, BoardGameFamily)
+		client := gogeek.NewClient()
+		return Query(client, 12, BoardGameFamily)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

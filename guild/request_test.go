@@ -1,10 +1,12 @@
 package guild
 
 import (
+
+	"github.com/kkjdaniel/gogeek/v2"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +20,8 @@ func TestQueryGuild(t *testing.T) {
 	url := constants.GuildEndpoint + "?id=1234"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	guild, err := Query(1234)
+	client := gogeek.NewClient()
+	guild, err := Query(client, 1234)
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, guild, "Guild should not be nil")
 
@@ -49,7 +52,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.GuildEndpoint + "?id=1234"
 
 	queryWrapper := func(url string) (*Guild, error) {
-		return Query(1234)
+		client := gogeek.NewClient()
+		return Query(client, 1234)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

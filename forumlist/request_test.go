@@ -1,10 +1,12 @@
 package forumlist
 
 import (
+
+	"github.com/kkjdaniel/gogeek/v2"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -21,7 +23,8 @@ func TestFetchForumList(t *testing.T) {
 	url := constants.ForumListEndpoint + "?id=174430&type=thing"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	forumList, err := Query(174430, Thing)
+	client := gogeek.NewClient()
+	forumList, err := Query(client, 174430, Thing)
 	require.NoError(t, err, "FetchForumList should not return an error")
 	require.NotNil(t, forumList, "ForumList should not be nil")
 
@@ -103,7 +106,8 @@ func TestFetchForumList_Family(t *testing.T) {
 	url := constants.ForumListEndpoint + "?id=12&type=family"
 	testutils.SetupMockResponder(t, url, mockDataFileValidFamily)
 
-	forumList, err := Query(12, Family)
+	client := gogeek.NewClient()
+	forumList, err := Query(client, 12, Family)
 	require.NoError(t, err, "FetchForumList should not return an error for family type")
 	require.NotNil(t, forumList, "ForumList should not be nil")
 
@@ -150,7 +154,8 @@ func TestFetchForumList_Family(t *testing.T) {
 }
 
 func TestQuery_InvalidType(t *testing.T) {
-	_, err := Query(174430, "invalid")
+	client := gogeek.NewClient()
+	_, err := Query(client, 174430, "invalid")
 	require.Error(t, err, "Query should return an error for invalid type")
 	require.ErrorIs(t, err, ErrInvalidForumListType, "Error should be ErrInvalidForumListType")
 }
@@ -159,7 +164,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.ForumListEndpoint + "?id=174430&type=thing"
 
 	queryWrapper := func(url string) (*ForumList, error) {
-		return Query(174430, Thing)
+		client := gogeek.NewClient()
+		return Query(client, 174430, Thing)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

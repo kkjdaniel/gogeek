@@ -1,10 +1,12 @@
 package hot
 
 import (
+
+	"github.com/kkjdaniel/gogeek/v2"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +20,8 @@ func TestQueryHotItems(t *testing.T) {
 	url := constants.HotEndpoint + "?type=boardgame"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	hotItems, err := Query(ItemTypeBoardGame)
+	client := gogeek.NewClient()
+	hotItems, err := Query(client, ItemTypeBoardGame)
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, hotItems, "Hot items should not be nil")
 
@@ -75,7 +78,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.HotEndpoint + "?type=boardgame"
 
 	queryWrapper := func(url string) (*HotItems, error) {
-		return Query(ItemTypeBoardGame)
+		client := gogeek.NewClient()
+		return Query(client, ItemTypeBoardGame)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

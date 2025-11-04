@@ -7,7 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +25,8 @@ func TestFetchAndUnmarshal_Success(t *testing.T) {
 	testutils.SetupMockResponder(t, testURL, mockDataFileValid)
 
 	var result TestXML
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.NoError(t, err, "FetchAndUnmarshal should not return an error with valid XML")
 	require.Equal(t, 123, result.ID, "ID should match expected value")
@@ -38,7 +40,8 @@ func TestFetchAndUnmarshal_HTTPError(t *testing.T) {
 	testutils.SetupHTTPErrorMock(t, testURL)
 
 	var result struct{}
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when HTTP request fails")
 	require.True(t, errors.Is(err, ErrHTTPError), "Error should be of type ErrHTTPError")
@@ -51,7 +54,8 @@ func TestFetchAndUnmarshal_BadStatusCode(t *testing.T) {
 	testutils.SetupMockResponderWithStatus(t, testURL, "", http.StatusNotFound)
 
 	var result struct{}
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when status is not 200")
 	require.True(t, errors.Is(err, ErrUnexpectedStatusCode), "Error should be of type ErrUnexpectedStatusCode")
@@ -66,7 +70,8 @@ func TestFetchAndUnmarshal_InvalidXML(t *testing.T) {
 	testutils.SetupMockResponderWithBody(t, testURL, invalidXML, http.StatusOK)
 
 	var result struct{}
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error with invalid XML")
 	require.True(t, errors.Is(err, ErrXMLParseError), "Error should be of type ErrXMLParseError")
@@ -85,7 +90,8 @@ func TestFetchAndUnmarshal_UnmarshalError(t *testing.T) {
 	}
 
 	var result MismatchStruct
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when unmarshaling fails")
 	require.True(t, errors.Is(err, ErrUnmarshalError), "Error should be of type ErrUnmarshalError")
@@ -114,7 +120,8 @@ func TestFetchAndUnmarshal_Status202_EventualSuccess(t *testing.T) {
 	})
 
 	var result TestXML
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.NoError(t, err, "FetchAndUnmarshal should eventually succeed after 202 responses")
 	require.Equal(t, 123, result.ID, "ID should match expected value")
@@ -142,7 +149,8 @@ func TestFetchAndUnmarshal_Status202_ExceedsRetries(t *testing.T) {
 	testutils.SetupSequentialResponders(t, testURL, responses)
 
 	var result struct{}
-	err := FetchAndUnmarshal(testURL, &result)
+	client := gogeek.NewClient()
+	err := FetchAndUnmarshal(client, testURL, &result)
 
 	require.Error(t, err, "FetchAndUnmarshal should fail after exceeding retries")
 	require.True(t, errors.Is(err, ErrMaxRetriesExceeded), "Error should be of type ErrMaxRetriesExceeded")

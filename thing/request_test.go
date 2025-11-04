@@ -3,8 +3,9 @@ package thing
 import (
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,8 @@ func TestQueryThing(t *testing.T) {
 	url := constants.ThingEndpoint + "?id=9&stats=1"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	thing, err := Query([]int{9})
+	client := gogeek.NewClient()
+	thing, err := Query(client, []int{9})
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, thing, "Thing should not be nil")
 
@@ -180,7 +182,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.ThingEndpoint + "?id=9"
 
 	queryWrapper := func(url string) (*Items, error) {
-		return Query([]int{9})
+		client := gogeek.NewClient()
+		return Query(client, []int{9})
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

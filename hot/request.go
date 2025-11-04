@@ -3,8 +3,9 @@ package hot
 import (
 	"fmt"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 type ItemType string
@@ -27,6 +28,7 @@ const (
 // and basic metadata.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - itemType: An ItemType constant specifying which category of items to retrieve
 //     (e.g. ItemTypeBoardGame, ItemTypeRPG)
 //
@@ -36,16 +38,17 @@ const (
 //
 // Example:
 //
-//	hotGames, err := hot.Query(hot.ItemTypeBoardGame)
+//	client := gogeek.NewClient()
+//	hotGames, err := hot.Query(client, hot.ItemTypeBoardGame)
 //	if err != nil {
 //	    log.Fatalf("Failed to retrieve hot games: %v", err)
 //	}
 //	fmt.Printf("Retrieved %d hot games. #1 is %s\n", len(hotGames.Items), hotGames.Items[0].Name.Value)
-func Query(itemType ItemType) (*HotItems, error) {
+func Query(client *gogeek.Client, itemType ItemType) (*HotItems, error) {
 	url := fmt.Sprintf(constants.HotEndpoint+"?type=%s", itemType)
 
 	var hotItems HotItems
-	if err := request.FetchAndUnmarshal(url, &hotItems); err != nil {
+	if err := request.FetchAndUnmarshal(client, url, &hotItems); err != nil {
 		return nil, err
 	}
 

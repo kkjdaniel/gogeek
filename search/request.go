@@ -3,8 +3,9 @@ package search
 import (
 	"net/url"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 // Query searches for board games in the BoardGameGeek database using a text query.
@@ -13,6 +14,7 @@ import (
 // of the search results including game IDs, names, and publication years.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - query: A string containing the search terms to find matching board games
 //   - exact: Optional boolean parameter to enable exact matching
 //
@@ -23,11 +25,12 @@ import (
 // Example:
 //
 //	// Regular search
-//	results, err := search.Query("catan")
+//	client := gogeek.NewClient()
+//	results, err := search.Query(client, "catan")
 //
 //	// Exact match search
-//	exactResults, err := search.Query("catan", true)
-func Query(query string, exact ...bool) (*SearchResults, error) {
+//	exactResults, err := search.Query(client, "catan", true)
+func Query(client *gogeek.Client, query string, exact ...bool) (*SearchResults, error) {
 	params := url.Values{}
 	params.Set("query", query)
 
@@ -38,7 +41,7 @@ func Query(query string, exact ...bool) (*SearchResults, error) {
 	requestURL := constants.SearchEndpoint + "?" + params.Encode()
 
 	var searchResults SearchResults
-	if err := request.FetchAndUnmarshal(requestURL, &searchResults); err != nil {
+	if err := request.FetchAndUnmarshal(client, requestURL, &searchResults); err != nil {
 		return nil, err
 	}
 

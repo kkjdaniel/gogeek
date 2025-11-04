@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,8 @@ func TestQueryCollection(t *testing.T) {
 	url := constants.CollectionEndpoint + "?username=testuser"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	collection, err := Query("testuser")
+	client := gogeek.NewClient()
+	collection, err := Query(client, "testuser")
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, collection, "Collection should not be nil")
 
@@ -108,7 +110,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.CollectionEndpoint + "?username=testuser"
 
 	queryWrapper := func(url string) (*Collection, error) {
-		return Query("testuser")
+		client := gogeek.NewClient()
+		return Query(client, "testuser")
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

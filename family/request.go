@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 const (
@@ -23,6 +24,7 @@ var ErrInvalidFamilyType = errors.New("invalid family type")
 // within that family.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - id: An integer ID corresponding to a board game family in the BGG database
 //   - familyType: A string indicating the type of family to query.
 //     Must be one of the defined constants: family.RPG, family.RPGPeriodical, or family.BoardGameFamily
@@ -34,12 +36,13 @@ var ErrInvalidFamilyType = errors.New("invalid family type")
 //
 // Example:
 //
-//	family, err := family.Query(12, family.BoardGameFamily)
+//	client := gogeek.NewClient()
+//	family, err := family.Query(client, 12, family.BoardGameFamily)
 //	if err != nil {
 //	    log.Fatalf("Failed to get family: %v", err)
 //	}
 //	fmt.Printf("Family: %s (contains %d games)\n", family.Items[0].Name.Value, len(family.Items[0].Links))
-func Query(id int, familyType string) (*Family, error) {
+func Query(client *gogeek.Client, id int, familyType string) (*Family, error) {
 	if !isValidFamilyType(familyType) {
 		return nil, fmt.Errorf("%w: %s (must be one of: %s, %s, %s)",
 			ErrInvalidFamilyType, familyType, RPG, RPGPeriodical, BoardGameFamily)
@@ -49,7 +52,7 @@ func Query(id int, familyType string) (*Family, error) {
 
 	var familyDetail Family
 
-	if err := request.FetchAndUnmarshal(url, &familyDetail); err != nil {
+	if err := request.FetchAndUnmarshal(client, url, &familyDetail); err != nil {
 		return nil, err
 	}
 

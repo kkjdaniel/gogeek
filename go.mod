@@ -1,4 +1,4 @@
-module github.com/kkjdaniel/gogeek
+module github.com/kkjdaniel/gogeek/v2
 
 go 1.21.3
 

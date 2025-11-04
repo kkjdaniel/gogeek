@@ -11,11 +11,8 @@ import (
 	"time"
 
 	"github.com/clbanning/mxj"
-	"go.uber.org/ratelimit"
+	"github.com/kkjdaniel/gogeek/v2"
 )
-
-// https://boardgamegeek.com/thread/2388502/updated-api-rate-limit-recommendation
-var limiter = ratelimit.New(1, ratelimit.Per(2*time.Second))
 
 var (
 	maxRetries = 5
@@ -39,11 +36,24 @@ var (
 	ErrXMLParseError = fmt.Errorf("failed to parse XML response")
 )
 
-func FetchAndUnmarshal(url string, v interface{}) error {
+func FetchAndUnmarshal(client *gogeek.Client, url string, v interface{}) error {
 	for attempt := 0; attempt <= maxRetries; attempt++ {
-		limiter.Take()
+		client.Limiter().Take()
 
-		resp, err := http.Get(url)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return ErrHTTPError
+		}
+
+		// Add authentication headers based on client configuration
+		switch client.AuthMode() {
+		case gogeek.AuthAPIKey:
+			req.Header.Set("Authorization", "Bearer "+client.APIKey())
+		case gogeek.AuthCookie:
+			req.Header.Set("Cookie", client.CookieString())
+		}
+
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return ErrHTTPError
 		}

@@ -3,8 +3,9 @@ package thread
 import (
 	"fmt"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 // Query retrieves detailed information about a specific thread from the BoardGameGeek API.
@@ -14,6 +15,7 @@ import (
 // and metadata such as post dates and authors.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - threadID: An integer ID corresponding to a thread in the BGG forums
 //
 // Returns:
@@ -22,17 +24,18 @@ import (
 //
 // Example:
 //
-//	thread, err := thread.Query(123456)
+//	client := gogeek.NewClient()
+//	thread, err := thread.Query(client, 123456)
 //	if err != nil {
 //	    log.Fatalf("Failed to get thread: %v", err)
 //	}
 //	fmt.Printf("Thread subject: %s (contains %d articles)\n", thread.Subject, len(thread.Articles))
-func Query(threadID int) (*ThreadDetail, error) {
+func Query(client *gogeek.Client, threadID int) (*ThreadDetail, error) {
 	url := fmt.Sprintf(constants.ThreadEndpoint+"?id=%d", threadID)
 
 	var threadDetail ThreadDetail
 
-	if err := request.FetchAndUnmarshal(url, &threadDetail); err != nil {
+	if err := request.FetchAndUnmarshal(client, url, &threadDetail); err != nil {
 		return nil, err
 	}
 

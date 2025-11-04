@@ -7,8 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 // CollectionOption represents an option for filtering collection queries
@@ -17,6 +18,7 @@ type CollectionOption func(params url.Values)
 // Query retrieves a user's board game collection from the BoardGameGeek API.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - username: A string containing the BGG username whose collection to retrieve
 //   - opts: Optional parameters for filtering and customizing the query
 //
@@ -26,11 +28,12 @@ type CollectionOption func(params url.Values)
 //
 // Example:
 //
-//	collection, err := collection.Query("exampleuser",
+//	client := gogeek.NewClient()
+//	collection, err := collection.Query(client, "exampleuser",
 //	    collection.WithOwned(true),
 //	    collection.WithStats(),
 //	    collection.WithMinRating(7))
-func Query(username string, opts ...CollectionOption) (*Collection, error) {
+func Query(client *gogeek.Client, username string, opts ...CollectionOption) (*Collection, error) {
 	params := url.Values{}
 	params.Set("username", username)
 
@@ -42,7 +45,7 @@ func Query(username string, opts ...CollectionOption) (*Collection, error) {
 	queryURL := constants.CollectionEndpoint + "?" + params.Encode()
 
 	var collection Collection
-	if err := request.FetchAndUnmarshal(queryURL, &collection); err != nil {
+	if err := request.FetchAndUnmarshal(client, queryURL, &collection); err != nil {
 		return nil, err
 	}
 

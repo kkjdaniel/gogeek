@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/url" // Add this import for URL encoding
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 // Query retrieves detailed information about a specific user from the BoardGameGeek API.
@@ -16,6 +17,7 @@ import (
 // characters are automatically URL-encoded.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - username: A string containing the BGG username to retrieve information for
 //
 // Returns:
@@ -24,12 +26,13 @@ import (
 //
 // Example:
 //
-//	userProfile, err := user.Query("example user")
+//	client := gogeek.NewClient()
+//	userProfile, err := user.Query(client, "example user")
 //	if err != nil {
 //	    log.Fatalf("Failed to retrieve user profile: %v", err)
 //	}
 //	fmt.Printf("User: %s (member since %s)\n", userProfile.Name, userProfile.YearRegistered)
-func Query(username string) (*User, error) {
+func Query(client *gogeek.Client, username string) (*User, error) {
 	escapedUsername := url.QueryEscape(username)
 
 	requestURL := fmt.Sprintf("%s?name=%s&buddies=1&guilds=1&top=1",
@@ -37,7 +40,7 @@ func Query(username string) (*User, error) {
 
 	var user User
 
-	if err := request.FetchAndUnmarshal(requestURL, &user); err != nil {
+	if err := request.FetchAndUnmarshal(client, requestURL, &user); err != nil {
 		return nil, err
 	}
 

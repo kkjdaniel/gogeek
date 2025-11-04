@@ -1,10 +1,12 @@
 package search
 
 import (
+
+	"github.com/kkjdaniel/gogeek/v2"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +20,8 @@ func TestQuerySearch(t *testing.T) {
 	url := constants.SearchEndpoint + "?query=test"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	results, err := Query("test")
+	client := gogeek.NewClient()
+	results, err := Query(client, "test")
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, results, "Search results should not be nil")
 
@@ -81,7 +84,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.SearchEndpoint + "?query=test"
 
 	queryWrapper := func(url string) (*SearchResults, error) {
-		return Query("test")
+		client := gogeek.NewClient()
+		return Query(client, "test")
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

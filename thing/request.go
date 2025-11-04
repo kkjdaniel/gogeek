@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 var (
@@ -22,6 +23,7 @@ var (
 // mechanics, designers, artists, publishers, and various statistics.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - ids: A slice of integer IDs corresponding to board game entries in the BGG database
 //
 // Returns:
@@ -30,12 +32,13 @@ var (
 //
 // Example:
 //
-//	details, err := thing.Query([]int{174430, 167791})
+//	client := gogeek.NewClient()
+//	details, err := thing.Query(client, []int{174430, 167791})
 //	if err != nil {
 //	    log.Fatalf("Failed to get game details: %v", err)
 //	}
 //	fmt.Printf("Retrieved details for %d games\n", len(details.Items))
-func Query(ids []int) (*Items, error) {
+func Query(client *gogeek.Client, ids []int) (*Items, error) {
 	if len(ids) == 0 {
 		return nil, ErrNoIDs
 	}
@@ -53,7 +56,7 @@ func Query(ids []int) (*Items, error) {
 	url := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, idParam)
 
 	var thing Items
-	if err := request.FetchAndUnmarshal(url, &thing); err != nil {
+	if err := request.FetchAndUnmarshal(client, url, &thing); err != nil {
 		return nil, err
 	}
 

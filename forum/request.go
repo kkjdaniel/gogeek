@@ -4,8 +4,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 // ForumOption represents an option for customizing forum queries
@@ -18,6 +19,7 @@ type ForumOption func(params url.Values)
 // and metadata such as post counts and dates.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - id: An integer ID corresponding to a forum in the BGG database
 //   - opts: Optional parameters for customizing the query (e.g., WithPage for pagination)
 //
@@ -28,18 +30,19 @@ type ForumOption func(params url.Values)
 // Example:
 //
 //	// Get first page (default)
-//	forum, err := forum.Query(1234)
+//	client := gogeek.NewClient()
+//	forum, err := forum.Query(client, 1234)
 //	if err != nil {
 //	    log.Fatalf("Failed to get forum: %v", err)
 //	}
 //	fmt.Printf("Forum title: %s (contains %d threads)\n", forum.Title, forum.NumThreads)
 //
 //	// Get specific page
-//	forum, err := forum.Query(1234, forum.WithPage(2))
+//	forum, err := forum.Query(client, 1234, forum.WithPage(2))
 //	if err != nil {
 //	    log.Fatalf("Failed to get forum page 2: %v", err)
 //	}
-func Query(id int, opts ...ForumOption) (*Forum, error) {
+func Query(client *gogeek.Client, id int, opts ...ForumOption) (*Forum, error) {
 	params := url.Values{}
 	params.Set("id", strconv.Itoa(id))
 
@@ -52,7 +55,7 @@ func Query(id int, opts ...ForumOption) (*Forum, error) {
 
 	var forumDetail Forum
 
-	if err := request.FetchAndUnmarshal(queryURL, &forumDetail); err != nil {
+	if err := request.FetchAndUnmarshal(client, queryURL, &forumDetail); err != nil {
 		return nil, err
 	}
 

@@ -3,8 +3,9 @@ package forum
 import (
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/testutils"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,8 @@ func TestFetchForum(t *testing.T) {
 	url := constants.ForumEndpoint + "?id=123"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	forum, err := Query(123)
+	client := gogeek.NewClient()
+	forum, err := Query(client, 123)
 	require.NoError(t, err, "FetchForum should not return an error")
 	require.NotNil(t, forum, "Forum should not be nil")
 
@@ -68,7 +70,8 @@ func TestFetchForum_WithPage(t *testing.T) {
 	url := constants.ForumEndpoint + "?id=123&page=2"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	forum, err := Query(123, WithPage(2))
+	client := gogeek.NewClient()
+	forum, err := Query(client, 123, WithPage(2))
 	require.NoError(t, err, "FetchForum with page should not return an error")
 	require.NotNil(t, forum, "Forum should not be nil")
 	require.Equal(t, 123, forum.ID)
@@ -78,7 +81,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.ForumEndpoint + "?id=123"
 
 	queryWrapper := func(url string) (*Forum, error) {
-		return Query(123)
+		client := gogeek.NewClient()
+		return Query(client, 123)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

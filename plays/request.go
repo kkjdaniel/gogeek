@@ -3,8 +3,9 @@ package plays
 import (
 	"fmt"
 
-	"github.com/kkjdaniel/gogeek/constants"
-	"github.com/kkjdaniel/gogeek/request"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/constants"
+	"github.com/kkjdaniel/gogeek/v2/request"
 )
 
 // Query retrieves play information for a specific BoardGameGeek user.
@@ -14,6 +15,7 @@ import (
 // player information, and play statistics.
 //
 // Parameters:
+//   - client: A GoGeek client configured with optional authentication
 //   - username: A string containing the BGG username whose play history to retrieve
 //
 // Returns:
@@ -22,17 +24,18 @@ import (
 //
 // Example:
 //
-//	plays, err := plays.Query("exampleuser")
+//	client := gogeek.NewClient()
+//	plays, err := plays.Query(client, "exampleuser")
 //	if err != nil {
 //	    log.Fatalf("Failed to retrieve plays: %v", err)
 //	}
 //	fmt.Printf("Found %d plays for user %s\n", plays.Total, plays.Username)
-func Query(username string) (*Plays, error) {
+func Query(client *gogeek.Client, username string) (*Plays, error) {
 	url := fmt.Sprintf(constants.PlaysEndpoint+"?username=%s", username)
 
 	var plays Plays
 
-	if err := request.FetchAndUnmarshal(url, &plays); err != nil {
+	if err := request.FetchAndUnmarshal(client, url, &plays); err != nil {
 		return nil, err
 	}
 
