@@ -100,7 +100,7 @@ All clients automatically enforce rate limiting of **2 requests per second** to 
 
 ## Documentation
 
-For the full documentation please see the [GoDoc here](https://pkg.go.dev/github.com/kkjdaniel/gogeek). Details on how to use each query function as well as the interfaces for each of the APIs can be found within their respective packages.
+For the full documentation please see the [GoDoc here](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v2). Details on how to use each query function as well as the interfaces for each of the APIs can be found within their respective packages.
 
 ## Contributing
 
