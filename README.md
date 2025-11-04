@@ -22,7 +22,7 @@ GoGeek is a lightweight, easy-to-use Go module designed to streamline interactio
 To setup GoGeek, use the following `go get` command:
 
 ```bash
-go get github.com/kkjdaniel/gogeek
+go get github.com/kkjdaniel/gogeek/v2
 ```
 
 ## Usage
@@ -38,8 +38,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kkjdaniel/gogeek"
-	"github.com/kkjdaniel/gogeek/thing"
+	"github.com/kkjdaniel/gogeek/v2"
+	"github.com/kkjdaniel/gogeek/v2/thing"
 )
 
 func main() {
