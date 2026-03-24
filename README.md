@@ -1,13 +1,15 @@
 <p align="center">
-  <img src="gogeek-logo.png" width="250" alt="GoGeek Logo">
+  <img src="gogeek-logo.png" width="350" alt="GoGeek Logo">
 </p>
 
-# GoGeek: Go Module for the BoardGameGeek API
+<h1 align="center">GoGeek: BoardGameGeek API for Go</h1>
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/kkjdaniel/gogeek/v2.svg)](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v2)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kkjdaniel/gogeek/v2)](https://goreportcard.com/report/github.com/kkjdaniel/gogeek/v2)
-[![codecov](https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D)](https://codecov.io/gh/kkjdaniel/gogeek)
-[![Contract Tests](https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg)](https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml)
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/kkjdaniel/gogeek/v2"><img src="https://pkg.go.dev/badge/github.com/kkjdaniel/gogeek/v2.svg" alt="Go Reference"></a>
+  <a href="https://goreportcard.com/report/github.com/kkjdaniel/gogeek/v2"><img src="https://goreportcard.com/badge/github.com/kkjdaniel/gogeek/v2" alt="Go Report Card"></a>
+  <a href="https://codecov.io/gh/kkjdaniel/gogeek"><img src="https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D" alt="codecov"></a>
+  <a href="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml"><img src="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg" alt="Contract Tests"></a>
+</p>
 
 GoGeek is a lightweight, easy-to-use Go module designed to streamline interactions with the [BoardGameGeek API](https://boardgamegeek.com/wiki/page/BGG_XML_API2) (XML API2).
 
@@ -17,6 +19,7 @@ GoGeek is a lightweight, easy-to-use Go module designed to streamline interactio
 - **🔐 Authentication Support**: Built-in support for API key and cookie-based authentication to access authenticated endpoints.
 - **📄 Data Parsing**: Automatically converts and normalises XML responses from the BGG API into Go structs, so you can work with structured data effortlessly.
 - **⚠️ Error Handling**: Robust error handling for common issues like network errors, rate limiting, queued requests and unexpected response formats.
+- **✅ Full API Coverage**: All BGG XML API2 endpoints are supported, with automated contract tests that run against the live API weekly to detect any structural changes or drift.
 
 ## Setup
 
