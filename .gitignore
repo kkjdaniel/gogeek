@@ -21,3 +21,10 @@
 go.work
 
 main.go
+
+# Environment files
+.env
+.env.*
+
+# macOS
+.DS_Store

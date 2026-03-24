@@ -1,0 +1,25 @@
+name: Contract tests
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 9am UTC
+  workflow_dispatch: # Allow manual runs
+
+jobs:
+  contract:
+    name: Run contract tests against live BGG API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run contract tests
+        run: go test -tags contract -v -count=1 ./contract/...
+        env:
+          BGG_API_KEY: ${{ secrets.BGG_API_KEY }}
