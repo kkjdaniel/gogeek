@@ -7,6 +7,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kkjdaniel/gogeek/v2.svg)](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kkjdaniel/gogeek/v2)](https://goreportcard.com/report/github.com/kkjdaniel/gogeek/v2)
 [![codecov](https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D)](https://codecov.io/gh/kkjdaniel/gogeek)
+[![Contract Tests](https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg)](https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml)
 
 GoGeek is a lightweight, easy-to-use Go module designed to streamline interactions with the [BoardGameGeek API](https://boardgamegeek.com/wiki/page/BGG_XML_API2) (XML API2).
 
