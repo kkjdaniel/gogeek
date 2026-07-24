@@ -205,7 +205,7 @@ func TestFixMalformedXML(t *testing.T) {
 			result := string(fixMalformedXML([]byte(tt.input)))
 			require.Equal(t, tt.expected, result, "XML should be fixed correctly")
 
-			var anyXML interface{}
+			var anyXML any
 			err := xml.Unmarshal([]byte(result), &anyXML)
 			require.NoError(t, err, "Fixed XML should be valid")
 		})

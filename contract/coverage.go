@@ -72,7 +72,7 @@ var globalIgnored = map[string]bool{
 // against the xml struct tags of the given model. It reports any XML fields
 // present in the API response that the Go struct doesn't capture.
 // Extra ignored path suffixes can be passed for endpoint-specific exclusions.
-func assertFieldCoverage(t *testing.T, rawXML []byte, model interface{}, endpointName string, ignored ...string) {
+func assertFieldCoverage(t *testing.T, rawXML []byte, model any, endpointName string, ignored ...string) {
 	t.Helper()
 
 	doc := etree.NewDocument()

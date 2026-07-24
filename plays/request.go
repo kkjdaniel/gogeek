@@ -1,7 +1,7 @@
 package plays
 
 import (
-	"fmt"
+	"net/url"
 
 	"github.com/kkjdaniel/gogeek/v2"
 	"github.com/kkjdaniel/gogeek/v2/constants"
@@ -31,11 +31,14 @@ import (
 //	}
 //	fmt.Printf("Found %d plays for user %s\n", plays.Total, plays.Username)
 func Query(client *gogeek.Client, username string) (*Plays, error) {
-	url := fmt.Sprintf(constants.PlaysEndpoint+"?username=%s", username)
+	params := url.Values{}
+	params.Set("username", username)
+
+	queryURL := constants.PlaysEndpoint + "?" + params.Encode()
 
 	var plays Plays
 
-	if err := request.FetchAndUnmarshal(client, url, &plays); err != nil {
+	if err := request.FetchAndUnmarshal(client, queryURL, &plays); err != nil {
 		return nil, err
 	}
 

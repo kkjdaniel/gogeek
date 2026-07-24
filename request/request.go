@@ -20,6 +20,13 @@ var (
 )
 
 var (
+	cdataRegex       = regexp.MustCompile(`(?s)<!\[CDATA\[(.*?)\]\]>`)
+	entityRegex      = regexp.MustCompile(`&(amp|lt|gt|apos|quot|#[0-9]+|#x[0-9a-fA-F]+);`)
+	htmlEntityRegex  = regexp.MustCompile(`&([a-zA-Z]+);`)
+	controlCharRegex = regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F]`)
+)
+
+var (
 	// ErrEmptyResponse is returned when the response body is empty
 	ErrEmptyResponse = fmt.Errorf("empty response body")
 	// ErrHTTPError is returned when the HTTP request fails
@@ -36,13 +43,13 @@ var (
 	ErrXMLParseError = fmt.Errorf("failed to parse XML response")
 )
 
-func FetchAndUnmarshal(client *gogeek.Client, url string, v interface{}) error {
+func FetchAndUnmarshal(client *gogeek.Client, url string, v any) error {
 	for attempt := 0; attempt <= maxRetries; attempt++ {
 		client.Limiter().Take()
 
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
-			return ErrHTTPError
+			return fmt.Errorf("%w: %v", ErrHTTPError, err)
 		}
 
 		// Add authentication headers based on client configuration
@@ -55,7 +62,7 @@ func FetchAndUnmarshal(client *gogeek.Client, url string, v interface{}) error {
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			return ErrHTTPError
+			return fmt.Errorf("%w: %v", ErrHTTPError, err)
 		}
 
 		// Handle 202 status - request accepted but still processing
@@ -77,6 +84,10 @@ func FetchAndUnmarshal(client *gogeek.Client, url string, v interface{}) error {
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
+			return fmt.Errorf("%w: failed to read response body: %v", ErrHTTPError, err)
+		}
+
+		if len(body) == 0 {
 			return ErrEmptyResponse
 		}
 
@@ -108,7 +119,6 @@ func FetchAndUnmarshal(client *gogeek.Client, url string, v interface{}) error {
 func fixMalformedXML(data []byte) []byte {
 	xmlStr := string(data)
 
-	cdataRegex := regexp.MustCompile(`<!\[CDATA\[(.*?)\]\]>`)
 	cdataSections := make(map[string]string)
 	xmlStr = cdataRegex.ReplaceAllStringFunc(xmlStr, func(match string) string {
 		placeholder := fmt.Sprintf("CDATA_PLACEHOLDER_%d", len(cdataSections))
@@ -116,12 +126,10 @@ func fixMalformedXML(data []byte) []byte {
 		return placeholder
 	})
 
-	entityRegex := regexp.MustCompile(`&(amp|lt|gt|apos|quot|#[0-9]+|#x[0-9a-fA-F]+);`)
 	xmlStr = entityRegex.ReplaceAllStringFunc(xmlStr, func(s string) string {
 		return "ENTITY_PLACEHOLDER" + s[1:]
 	})
 
-	htmlEntityRegex := regexp.MustCompile(`&([a-zA-Z]+);`)
 	xmlStr = htmlEntityRegex.ReplaceAllStringFunc(xmlStr, func(s string) string {
 
 		unescaped := html.UnescapeString(s)
@@ -132,16 +140,15 @@ func fixMalformedXML(data []byte) []byte {
 		return s
 	})
 
-	xmlStr = strings.Replace(xmlStr, "&", "&amp;", -1)
+	xmlStr = strings.ReplaceAll(xmlStr, "&", "&amp;")
 
-	xmlStr = strings.Replace(xmlStr, "ENTITY_PLACEHOLDER", "&", -1)
+	xmlStr = strings.ReplaceAll(xmlStr, "ENTITY_PLACEHOLDER", "&")
 
 	for placeholder, cdata := range cdataSections {
-		xmlStr = strings.Replace(xmlStr, placeholder, cdata, -1)
+		xmlStr = strings.ReplaceAll(xmlStr, placeholder, cdata)
 	}
 
-	re := regexp.MustCompile(`[\x00-\x08\x0B\x0C\x0E-\x1F]`)
-	xmlStr = re.ReplaceAllString(xmlStr, "")
+	xmlStr = controlCharRegex.ReplaceAllString(xmlStr, "")
 
 	return []byte(xmlStr)
 }
