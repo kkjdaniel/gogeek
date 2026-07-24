@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://pkg.go.dev/github.com/kkjdaniel/gogeek/v2"><img src="https://pkg.go.dev/badge/github.com/kkjdaniel/gogeek/v2.svg" alt="Go Reference"></a>
-  <a href="https://goreportcard.com/report/github.com/kkjdaniel/gogeek/v2"><img src="https://goreportcard.com/badge/github.com/kkjdaniel/gogeek/v2" alt="Go Report Card"></a>
+  <a href="https://github.com/kkjdaniel/gogeek/actions/workflows/lint.yml"><img src="https://github.com/kkjdaniel/gogeek/actions/workflows/lint.yml/badge.svg" alt="Lint"></a>
   <a href="https://codecov.io/gh/kkjdaniel/gogeek"><img src="https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D" alt="codecov"></a>
   <a href="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml"><img src="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg" alt="Contract Tests"></a>
 </p>

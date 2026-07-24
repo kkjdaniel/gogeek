@@ -68,7 +68,7 @@ func FetchAndUnmarshal(client *gogeek.Client, url string, v any) error {
 		// Handle 202 status - request accepted but still processing
 		// https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc12
 		if resp.StatusCode == http.StatusAccepted {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			if attempt == maxRetries {
 				return ErrMaxRetriesExceeded
 			}
@@ -76,7 +76,7 @@ func FetchAndUnmarshal(client *gogeek.Client, url string, v any) error {
 			continue
 		}
 
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("%w: %d", ErrUnexpectedStatusCode, resp.StatusCode)
