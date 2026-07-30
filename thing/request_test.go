@@ -1,11 +1,14 @@
 package thing
 
 import (
+	"context"
+	"fmt"
+	"strings"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/v2"
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/testutils"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -19,8 +22,8 @@ func TestQueryThing(t *testing.T) {
 	url := constants.ThingEndpoint + "?id=9&stats=1"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	client := gogeek.NewClient()
-	thing, err := Query(client, []int{9})
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	thing, err := Query(context.Background(), client, []int{9})
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, thing, "Thing should not be nil")
 
@@ -188,9 +191,60 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.ThingEndpoint + "?id=9"
 
 	queryWrapper := func(url string) (*Items, error) {
-		client := gogeek.NewClient()
-		return Query(client, []int{9})
+		client := gogeek.NewClient(gogeek.APIKey("test-key"))
+		return Query(context.Background(), client, []int{9})
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)
+}
+
+func TestQuery_NoIDs(t *testing.T) {
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	result, err := Query(context.Background(), client, nil)
+
+	require.ErrorIs(t, err, ErrNoIDs)
+	require.Nil(t, result)
+}
+
+func TestQuery_AutoChunksBeyond20IDs(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	// 25 IDs should be fetched as one batch of 20 and one batch of 5.
+	ids := make([]int, 25)
+	for i := range ids {
+		ids[i] = i + 1
+	}
+
+	makeBody := func(ids []int) string {
+		var sb strings.Builder
+		sb.WriteString(`<items>`)
+		for _, id := range ids {
+			fmt.Fprintf(&sb, `<item type="boardgame" id="%d"></item>`, id)
+		}
+		sb.WriteString(`</items>`)
+		return sb.String()
+	}
+
+	firstIDs := make([]string, 20)
+	for i := range firstIDs {
+		firstIDs[i] = fmt.Sprintf("%d", i+1)
+	}
+	secondIDs := make([]string, 5)
+	for i := range secondIDs {
+		secondIDs[i] = fmt.Sprintf("%d", i+21)
+	}
+
+	firstURL := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, strings.Join(firstIDs, ","))
+	secondURL := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, strings.Join(secondIDs, ","))
+
+	testutils.SetupMockResponderWithBody(t, firstURL, makeBody(ids[:20]), 200)
+	testutils.SetupMockResponderWithBody(t, secondURL, makeBody(ids[20:]), 200)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"), gogeek.WithRateLimit(1000))
+	result, err := Query(context.Background(), client, ids)
+
+	require.NoError(t, err, "Query should transparently chunk >20 IDs")
+	require.Len(t, result.Items, 25, "All items from both batches should be merged")
+	require.Equal(t, 1, result.Items[0].ID)
+	require.Equal(t, 25, result.Items[24].ID)
 }

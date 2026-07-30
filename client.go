@@ -1,76 +1,105 @@
+// Package gogeek provides a client for the BoardGameGeek XML API2.
 package gogeek
 
 import (
-	"go.uber.org/ratelimit"
+	"context"
+	"errors"
+	"net/http"
+	"time"
+
+	"golang.org/x/time/rate"
 )
 
-// AuthMode represents the authentication method for the client
-type AuthMode int
+// ErrInvalidOption is wrapped by errors returned when a query option is
+// given an out-of-range or otherwise invalid argument.
+var ErrInvalidOption = errors.New("invalid option")
 
 const (
-	// AuthNone indicates no authentication
-	AuthNone AuthMode = iota
-	// AuthAPIKey indicates API key authentication using Bearer token
-	AuthAPIKey
-	// AuthCookie indicates cookie-based authentication
-	AuthCookie
+	defaultTimeout    = 30 * time.Second
+	defaultRateLimit  = 2
+	defaultMaxRetries = 5
+	defaultRetryDelay = 2 * time.Second
 )
 
-// Client represents a GoGeek API client with configurable authentication
+type authMode int
+
+const (
+	authAPIKey authMode = iota + 1
+	authCookie
+)
+
+// Auth holds credentials for the BGG API. Construct one with APIKey or
+// Cookie; the zero value sends no authentication headers, which BGG rejects.
+type Auth struct {
+	mode  authMode
+	value string
+}
+
+// APIKey returns an Auth that authenticates requests with the given API key,
+// sent as a Bearer token in the Authorization header. API keys can be
+// requested at https://boardgamegeek.com/applications.
+func APIKey(key string) Auth {
+	return Auth{mode: authAPIKey, value: key}
+}
+
+// Cookie returns an Auth that authenticates requests with the given raw
+// Cookie header value (e.g. "bggusername=user; bggpassword=...; SessionID=...").
+// Cookie authentication can access private collection data that an API key
+// may not.
+func Cookie(cookie string) Auth {
+	return Auth{mode: authCookie, value: cookie}
+}
+
+// Client is a BGG API client. Create one with NewClient.
 type Client struct {
-	limiter      ratelimit.Limiter
-	authMode     AuthMode
-	apiKey       string
-	cookieString string
+	httpClient *http.Client
+	limiter    *rate.Limiter
+	auth       Auth
+	maxRetries int
+	retryDelay time.Duration
 }
 
-// Limiter returns the rate limiter for this client
-func (c *Client) Limiter() ratelimit.Limiter {
-	return c.limiter
-}
-
-// AuthMode returns the authentication mode for this client
-func (c *Client) AuthMode() AuthMode {
-	return c.authMode
-}
-
-// APIKey returns the API key for this client (only valid when AuthMode is AuthAPIKey)
-func (c *Client) APIKey() string {
-	return c.apiKey
-}
-
-// CookieString returns the cookie string for this client (only valid when AuthMode is AuthCookie)
-func (c *Client) CookieString() string {
-	return c.cookieString
-}
-
-// ClientOption is a functional option for configuring a Client
+// ClientOption is a functional option for configuring a Client.
 type ClientOption func(*Client)
 
-// WithAPIKey configures the client to use API key authentication
-// The API key will be sent as a Bearer token in the Authorization header
-func WithAPIKey(key string) ClientOption {
+// WithHTTPClient replaces the default HTTP client (30 second timeout) with a
+// custom one, for callers who need a specific transport, proxy, or timeout.
+func WithHTTPClient(httpClient *http.Client) ClientOption {
 	return func(c *Client) {
-		c.authMode = AuthAPIKey
-		c.apiKey = key
+		c.httpClient = httpClient
 	}
 }
 
-// WithCookie configures the client to use cookie-based authentication
-// The cookie string should be the raw Cookie header value (e.g., "session=abc; token=xyz")
-func WithCookie(cookie string) ClientOption {
+// WithRateLimit replaces the default rate limit of 2 requests per second.
+func WithRateLimit(rps int) ClientOption {
 	return func(c *Client) {
-		c.authMode = AuthCookie
-		c.cookieString = cookie
+		c.limiter = rate.NewLimiter(rate.Limit(rps), 1)
 	}
 }
 
-// NewClient creates a new GoGeek API client with optional configuration
-// By default, the client uses no authentication and has a rate limit of 2 requests per second
-func NewClient(opts ...ClientOption) *Client {
+// WithRetry replaces the default retry behaviour (5 retries, 2 second base
+// delay) used when BGG responds with a retryable status (202, 429, 503).
+// The delay is the base for exponential backoff and is superseded by a
+// Retry-After response header when present.
+func WithRetry(maxRetries int, delay time.Duration) ClientOption {
+	return func(c *Client) {
+		c.maxRetries = maxRetries
+		c.retryDelay = delay
+	}
+}
+
+// NewClient creates a new BGG API client. All BGG endpoints require
+// authentication, so an Auth (from APIKey or Cookie) is mandatory. By
+// default the client sends at most 2 requests per second, times out
+// requests after 30 seconds, and retries retryable responses up to 5 times;
+// use the options to change any of these.
+func NewClient(auth Auth, opts ...ClientOption) *Client {
 	client := &Client{
-		limiter:  ratelimit.New(2, ratelimit.WithoutSlack),
-		authMode: AuthNone,
+		httpClient: &http.Client{Timeout: defaultTimeout},
+		limiter:    rate.NewLimiter(rate.Limit(defaultRateLimit), 1),
+		auth:       auth,
+		maxRetries: defaultMaxRetries,
+		retryDelay: defaultRetryDelay,
 	}
 
 	for _, opt := range opts {
@@ -78,4 +107,34 @@ func NewClient(opts ...ClientOption) *Client {
 	}
 
 	return client
+}
+
+// Prepare applies authentication headers and rate limiting to req, blocking
+// until the rate limiter permits the request or ctx is done. It allows raw
+// requests to BGG without exposing the client's credentials.
+func (c *Client) Prepare(ctx context.Context, req *http.Request) error {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return err
+	}
+
+	switch c.auth.mode {
+	case authAPIKey:
+		req.Header.Set("Authorization", "Bearer "+c.auth.value)
+	case authCookie:
+		req.Header.Set("Cookie", c.auth.value)
+	}
+
+	return nil
+}
+
+// HTTPClient returns the HTTP client used to send requests, either the
+// default or the one supplied via WithHTTPClient.
+func (c *Client) HTTPClient() *http.Client {
+	return c.httpClient
+}
+
+// RetryPolicy returns the maximum number of retries and the base backoff
+// delay used for retryable responses, as configured by WithRetry.
+func (c *Client) RetryPolicy() (maxRetries int, delay time.Duration) {
+	return c.maxRetries, c.retryDelay
 }

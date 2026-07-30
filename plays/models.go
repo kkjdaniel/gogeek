@@ -1,5 +1,6 @@
 package plays
 
+// Plays is a page of a user's logged plays as returned by the plays endpoint.
 type Plays struct {
 	UserID   int    `xml:"userid,attr"`
 	Username string `xml:"username,attr"`
@@ -8,6 +9,7 @@ type Plays struct {
 	Plays    []Play `xml:"play"`
 }
 
+// Play is a single logged play, including the item played and its players.
 type Play struct {
 	ID         int      `xml:"id,attr"`
 	Date       string   `xml:"date,attr"`
@@ -21,6 +23,7 @@ type Play struct {
 	Players    []Player `xml:"players>player"`
 }
 
+// Player is a participant in a logged play, with their score and result.
 type Player struct {
 	Username      string `xml:"username,attr"`
 	UserID        int    `xml:"userid,attr"`
@@ -33,6 +36,7 @@ type Player struct {
 	Win           int    `xml:"win,attr"`
 }
 
+// PlayItem is the game or item that a play was logged against.
 type PlayItem struct {
 	Name       string    `xml:"name,attr"`
 	ObjectType string    `xml:"objecttype,attr"`
@@ -40,6 +44,7 @@ type PlayItem struct {
 	Subtypes   []Subtype `xml:"subtypes>subtype"`
 }
 
+// Subtype holds an XML value attribute naming a played item's subtype (e.g. boardgame).
 type Subtype struct {
 	Value string `xml:"value,attr"`
 }

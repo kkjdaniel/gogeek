@@ -1,14 +1,16 @@
 package guild
 
 import (
-
-	"github.com/kkjdaniel/gogeek/v2"
+	"context"
+	"net/url"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/testutils"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/testutils"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,11 +19,11 @@ const mockDataFileValid = "testdata/valid_guild_response.xml"
 func TestQueryGuild(t *testing.T) {
 	defer testutils.ActivateMocks()()
 
-	url := constants.GuildEndpoint + "?id=1234"
-	testutils.SetupMockResponder(t, url, mockDataFileValid)
+	mockURL := constants.GuildEndpoint + "?id=1234"
+	testutils.SetupMockResponder(t, mockURL, mockDataFileValid)
 
-	client := gogeek.NewClient()
-	guild, err := Query(client, 1234)
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	guild, err := Query(context.Background(), client, 1234)
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, guild, "Guild should not be nil")
 
@@ -52,9 +54,45 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.GuildEndpoint + "?id=1234"
 
 	queryWrapper := func(url string) (*Guild, error) {
-		client := gogeek.NewClient()
-		return Query(client, 1234)
+		client := gogeek.NewClient(gogeek.APIKey("test-key"))
+		return Query(context.Background(), client, 1234)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)
+}
+
+func TestGuildOptions(t *testing.T) {
+	tests := []struct {
+		name     string
+		option   Option
+		expected map[string]string
+	}{
+		{"WithMembers", WithMembers(), map[string]string{"members": "1"}},
+		{"WithPage", WithPage(3), map[string]string{"page": "3"}},
+		{"WithSortUsername", WithSort("username"), map[string]string{"sort": "username"}},
+		{"WithSortDate", WithSort("date"), map[string]string{"sort": "date"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := url.Values{}
+			require.NoError(t, tt.option(params))
+
+			for key, expectedValue := range tt.expected {
+				assert.Equal(t, expectedValue, params.Get(key))
+			}
+			assert.Equal(t, len(tt.expected), len(params))
+		})
+	}
+}
+
+func TestGuildOptions_Invalid(t *testing.T) {
+	params := url.Values{}
+	assert.ErrorIs(t, WithPage(0)(params), gogeek.ErrInvalidOption)
+	assert.ErrorIs(t, WithSort("bogus")(params), gogeek.ErrInvalidOption)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	result, err := Query(context.Background(), client, 1234, WithSort("bogus"))
+	assert.ErrorIs(t, err, gogeek.ErrInvalidOption)
+	assert.Nil(t, result)
 }

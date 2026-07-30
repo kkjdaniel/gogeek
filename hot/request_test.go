@@ -1,12 +1,12 @@
 package hot
 
 import (
-
-	"github.com/kkjdaniel/gogeek/v2"
+	"context"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/testutils"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
@@ -20,8 +20,8 @@ func TestQueryHotItems(t *testing.T) {
 	url := constants.HotEndpoint + "?type=boardgame"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	client := gogeek.NewClient()
-	hotItems, err := Query(client, ItemTypeBoardGame)
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	hotItems, err := Query(context.Background(), client, ItemTypeBoardGame)
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, hotItems, "Hot items should not be nil")
 
@@ -78,9 +78,17 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.HotEndpoint + "?type=boardgame"
 
 	queryWrapper := func(url string) (*HotItems, error) {
-		client := gogeek.NewClient()
-		return Query(client, ItemTypeBoardGame)
+		client := gogeek.NewClient(gogeek.APIKey("test-key"))
+		return Query(context.Background(), client, ItemTypeBoardGame)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)
+}
+
+func TestQuery_InvalidItemType(t *testing.T) {
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	result, err := Query(context.Background(), client, ItemType("bogus"))
+
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption, "Unknown item types should be rejected before any request")
+	require.Nil(t, result)
 }

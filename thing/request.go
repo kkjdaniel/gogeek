@@ -1,20 +1,22 @@
 package thing
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/kkjdaniel/gogeek/v2"
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/request"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/request"
 )
 
-var (
-	// ErrTooManyIDs is returned when more than 20 IDs are provided for a query.
-	ErrTooManyIDs = fmt.Errorf("too many IDs provided, maximum is 20")
-	// ErrNoIDs is returned when no IDs are provided for a query.
-	ErrNoIDs = fmt.Errorf("no IDs provided")
-)
+// ErrNoIDs is returned when no IDs are provided for a query.
+var ErrNoIDs = errors.New("no IDs provided")
+
+// maxIDsPerRequest is the number of IDs the BGG API accepts in a single
+// thing request.
+const maxIDsPerRequest = 20
 
 // Query retrieves detailed information about one or more board games from the BoardGameGeek API.
 //
@@ -22,8 +24,14 @@ var (
 // of the corresponding board games' details including names, descriptions, categories,
 // mechanics, designers, artists, publishers, and various statistics.
 //
+// The BGG API accepts at most 20 IDs per request, so larger slices are
+// transparently split into sequential batches of 20 and the results merged.
+// Note that each batch is a separate rate-limited request, so a large ID
+// slice takes correspondingly longer.
+//
 // Parameters:
-//   - client: A GoGeek client configured with optional authentication
+//   - ctx: A context that can cancel or time-bound the request
+//   - client: A GoGeek client configured with authentication
 //   - ids: A slice of integer IDs corresponding to board game entries in the BGG database
 //
 // Returns:
@@ -32,33 +40,34 @@ var (
 //
 // Example:
 //
-//	client := gogeek.NewClient()
-//	details, err := thing.Query(client, []int{174430, 167791})
+//	client := gogeek.NewClient(gogeek.APIKey("your-api-key"))
+//	details, err := thing.Query(context.Background(), client, []int{174430, 167791})
 //	if err != nil {
 //	    log.Fatalf("Failed to get game details: %v", err)
 //	}
 //	fmt.Printf("Retrieved details for %d games\n", len(details.Items))
-func Query(client *gogeek.Client, ids []int) (*Items, error) {
+func Query(ctx context.Context, client *gogeek.Client, ids []int) (*Items, error) {
 	if len(ids) == 0 {
 		return nil, ErrNoIDs
 	}
 
-	if len(ids) > 20 {
-		return nil, ErrTooManyIDs
+	var all Items
+	for start := 0; start < len(ids); start += maxIDsPerRequest {
+		batch := ids[start:min(start+maxIDsPerRequest, len(ids))]
+
+		idStrings := make([]string, len(batch))
+		for i, id := range batch {
+			idStrings[i] = fmt.Sprintf("%d", id)
+		}
+
+		url := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, strings.Join(idStrings, ","))
+
+		var page Items
+		if err := request.FetchAndUnmarshal(ctx, client, url, &page); err != nil {
+			return nil, err
+		}
+		all.Items = append(all.Items, page.Items...)
 	}
 
-	idStrings := make([]string, len(ids))
-	for i, id := range ids {
-		idStrings[i] = fmt.Sprintf("%d", id)
-	}
-	idParam := strings.Join(idStrings, ",")
-
-	url := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, idParam)
-
-	var thing Items
-	if err := request.FetchAndUnmarshal(client, url, &thing); err != nil {
-		return nil, err
-	}
-
-	return &thing, nil
+	return &all, nil
 }

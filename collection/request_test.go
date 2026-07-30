@@ -1,13 +1,14 @@
 package collection
 
 import (
+	"context"
 	"net/url"
 	"testing"
 	"time"
 
-	"github.com/kkjdaniel/gogeek/v2"
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/testutils"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -22,8 +23,8 @@ func TestQueryCollection(t *testing.T) {
 	url := constants.CollectionEndpoint + "?username=testuser"
 	testutils.SetupMockResponder(t, url, mockDataFileValid)
 
-	client := gogeek.NewClient()
-	collection, err := Query(client, "testuser")
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	collection, err := Query(context.Background(), client, "testuser")
 	require.NoError(t, err, "Query should not return an error")
 	require.NotNil(t, collection, "Collection should not be nil")
 
@@ -110,8 +111,8 @@ func TestQuery_Error(t *testing.T) {
 	testURL := constants.CollectionEndpoint + "?username=testuser"
 
 	queryWrapper := func(url string) (*Collection, error) {
-		client := gogeek.NewClient()
-		return Query(client, "testuser")
+		client := gogeek.NewClient(gogeek.APIKey("test-key"))
+		return Query(context.Background(), client, "testuser")
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)
@@ -120,7 +121,7 @@ func TestQuery_Error(t *testing.T) {
 func TestCollectionOptions(t *testing.T) {
 	tests := []struct {
 		name     string
-		option   CollectionOption
+		option   Option
 		expected map[string]string
 	}{
 		{"WithVersion", WithVersion(), map[string]string{"version": "1"}},
@@ -169,14 +170,14 @@ func TestCollectionOptions(t *testing.T) {
 	t.Run("WithModifiedSince", func(t *testing.T) {
 		params := url.Values{}
 		testDate := time.Date(2025, 4, 1, 12, 30, 0, 0, time.UTC)
-		WithModifiedSince(testDate)(params)
+		require.NoError(t, WithModifiedSince(testDate)(params))
 		assert.Equal(t, "2025-04-01 12:30:00", params.Get("modifiedsince"))
 	})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			params := url.Values{}
-			tt.option(params)
+			require.NoError(t, tt.option(params))
 
 			for key, expectedValue := range tt.expected {
 				assert.Equal(t, expectedValue, params.Get(key),
@@ -193,31 +194,45 @@ func TestInvalidParameterValues(t *testing.T) {
 	t.Run("WishlistPriority invalid bounds", func(t *testing.T) {
 		for _, invalid := range []int{0, 6, -1, 10} {
 			params := url.Values{}
-			WithWishlistPriority(invalid)(params)
-			assert.Empty(t, params.Get("wishlistpriority"),
-				"Should not set parameter for invalid value %d", invalid)
+			err := WithWishlistPriority(invalid)(params)
+			assert.ErrorIs(t, err, gogeek.ErrInvalidOption,
+				"Should reject invalid value %d", invalid)
+			assert.Empty(t, params.Get("wishlistpriority"))
 		}
 	})
 
 	t.Run("Rating invalid bounds", func(t *testing.T) {
 		for _, invalid := range []float64{0.5, 10.5, -1.0, 11.0} {
 			params := url.Values{}
-			WithMinRating(invalid)(params)
-			assert.Empty(t, params.Get("minrating"),
-				"Should not set parameter for invalid value %f", invalid)
+			err := WithMinRating(invalid)(params)
+			assert.ErrorIs(t, err, gogeek.ErrInvalidOption,
+				"Should reject invalid value %f", invalid)
 
 			params = url.Values{}
-			WithMaxRating(invalid)(params)
-			assert.Empty(t, params.Get("rating"),
-				"Should not set parameter for invalid value %f", invalid)
+			err = WithMaxRating(invalid)(params)
+			assert.ErrorIs(t, err, gogeek.ErrInvalidOption,
+				"Should reject invalid value %f", invalid)
 		}
+	})
+
+	t.Run("Subtype invalid value", func(t *testing.T) {
+		params := url.Values{}
+		assert.ErrorIs(t, WithSubtype("bogus")(params), gogeek.ErrInvalidOption)
+		assert.ErrorIs(t, WithExcludeSubtype("bogus")(params), gogeek.ErrInvalidOption)
+	})
+
+	t.Run("Query surfaces option error before any request", func(t *testing.T) {
+		client := gogeek.NewClient(gogeek.APIKey("test-key"))
+		result, err := Query(context.Background(), client, "testuser", WithMinRating(11))
+		assert.ErrorIs(t, err, gogeek.ErrInvalidOption)
+		assert.Nil(t, result)
 	})
 }
 
 func TestMultipleOptions(t *testing.T) {
 	params := url.Values{}
 
-	options := []CollectionOption{
+	options := []Option{
 		WithOwned(true),
 		WithStats(),
 		WithMinRating(7.0),
@@ -225,7 +240,7 @@ func TestMultipleOptions(t *testing.T) {
 	}
 
 	for _, opt := range options {
-		opt(params)
+		require.NoError(t, opt(params))
 	}
 
 	expected := map[string]string{

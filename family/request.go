@@ -1,20 +1,26 @@
 package family
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
-	"github.com/kkjdaniel/gogeek/v2"
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/request"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/request"
 )
 
 const (
-	RPG             = "rpg"
-	RPGPeriodical   = "rpgperiodical"
+	// RPG is the family type for RPG families.
+	RPG = "rpg"
+	// RPGPeriodical is the family type for RPG periodical families.
+	RPGPeriodical = "rpgperiodical"
+	// BoardGameFamily is the family type for board game families.
 	BoardGameFamily = "boardgamefamily"
 )
 
+// ErrInvalidFamilyType is returned when the provided family type is not one of
+// RPG, RPGPeriodical, or BoardGameFamily.
 var ErrInvalidFamilyType = errors.New("invalid family type")
 
 // Query retrieves detailed information about a specific board game family from the BoardGameGeek API.
@@ -24,7 +30,8 @@ var ErrInvalidFamilyType = errors.New("invalid family type")
 // within that family.
 //
 // Parameters:
-//   - client: A GoGeek client configured with optional authentication
+//   - ctx: A context that can cancel or time-bound the request
+//   - client: A GoGeek client configured with authentication
 //   - id: An integer ID corresponding to a board game family in the BGG database
 //   - familyType: A string indicating the type of family to query.
 //     Must be one of the defined constants: family.RPG, family.RPGPeriodical, or family.BoardGameFamily
@@ -36,13 +43,13 @@ var ErrInvalidFamilyType = errors.New("invalid family type")
 //
 // Example:
 //
-//	client := gogeek.NewClient()
-//	family, err := family.Query(client, 12, family.BoardGameFamily)
+//	client := gogeek.NewClient(gogeek.APIKey("your-api-key"))
+//	family, err := family.Query(context.Background(), client, 12, family.BoardGameFamily)
 //	if err != nil {
 //	    log.Fatalf("Failed to get family: %v", err)
 //	}
 //	fmt.Printf("Family: %s (contains %d games)\n", family.Items[0].Name.Value, len(family.Items[0].Links))
-func Query(client *gogeek.Client, id int, familyType string) (*Family, error) {
+func Query(ctx context.Context, client *gogeek.Client, id int, familyType string) (*Family, error) {
 	if !isValidFamilyType(familyType) {
 		return nil, fmt.Errorf("%w: %s (must be one of: %s, %s, %s)",
 			ErrInvalidFamilyType, familyType, RPG, RPGPeriodical, BoardGameFamily)
@@ -52,7 +59,7 @@ func Query(client *gogeek.Client, id int, familyType string) (*Family, error) {
 
 	var familyDetail Family
 
-	if err := request.FetchAndUnmarshal(client, url, &familyDetail); err != nil {
+	if err := request.FetchAndUnmarshal(ctx, client, url, &familyDetail); err != nil {
 		return nil, err
 	}
 

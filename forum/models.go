@@ -1,5 +1,7 @@
 package forum
 
+// Forum is a BGG forum as returned by the forum endpoint, including its
+// metadata and the threads it contains.
 type Forum struct {
 	ID           int      `xml:"id,attr"`
 	Title        string   `xml:"title,attr"`
@@ -10,6 +12,7 @@ type Forum struct {
 	Threads      []Thread `xml:"threads>thread"`
 }
 
+// Thread is a discussion thread within a BGG forum.
 type Thread struct {
 	ID           int    `xml:"id,attr"`
 	Subject      string `xml:"subject,attr"`

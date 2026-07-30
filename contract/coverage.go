@@ -3,6 +3,7 @@
 package contract
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,54 +13,41 @@ import (
 	"time"
 
 	"github.com/beevik/etree"
-	gogeek "github.com/kkjdaniel/gogeek/v2"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
 )
 
-// fetchRawXML makes an authenticated, rate-limited request and returns the raw XML bytes.
-func fetchRawXML(client *gogeek.Client, url string) ([]byte, error) {
-	client.Limiter().Take()
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	switch client.AuthMode() {
-	case gogeek.AuthAPIKey:
-		req.Header.Set("Authorization", "Bearer "+client.APIKey())
-	case gogeek.AuthCookie:
-		req.Header.Set("Cookie", client.CookieString())
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Handle 202 (processing) with a single retry
-	if resp.StatusCode == http.StatusAccepted {
-		time.Sleep(3 * time.Second)
-		client.Limiter().Take()
-		req2, _ := http.NewRequest("GET", url, nil)
-		switch client.AuthMode() {
-		case gogeek.AuthAPIKey:
-			req2.Header.Set("Authorization", "Bearer "+client.APIKey())
-		case gogeek.AuthCookie:
-			req2.Header.Set("Cookie", client.CookieString())
-		}
-		resp, err = http.DefaultClient.Do(req2)
+// fetchRawXML makes an authenticated, rate-limited request and returns the
+// raw XML bytes, retrying once on 202 (still processing).
+func fetchRawXML(ctx context.Context, client *gogeek.Client, url string) ([]byte, error) {
+	for attempt := 0; ; attempt++ {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 		if err != nil {
 			return nil, err
 		}
+
+		if err := client.Prepare(ctx, req); err != nil {
+			return nil, err
+		}
+
+		resp, err := client.HTTPClient().Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode == http.StatusAccepted && attempt == 0 {
+			resp.Body.Close()
+			time.Sleep(3 * time.Second)
+			continue
+		}
+
 		defer resp.Body.Close()
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		}
 
-	return io.ReadAll(resp.Body)
+		return io.ReadAll(resp.Body)
+	}
 }
 
 // globalIgnored contains XML paths that appear in every BGG API response
@@ -134,9 +122,9 @@ func checkElement(elem *etree.Element, structType reflect.Type, path string, unm
 	}
 
 	// Build lookup maps from the struct's xml tags.
-	elemFields := map[string]reflect.Type{}   // element name -> resolved field type
-	attrFields := map[string]bool{}           // attribute name -> true
-	nestedPaths := map[string]nestedField{}   // wrapper element -> child info
+	elemFields := map[string]reflect.Type{} // element name -> resolved field type
+	attrFields := map[string]bool{}         // attribute name -> true
+	nestedPaths := map[string]nestedField{} // wrapper element -> child info
 	hasChardata := false
 
 	for i := 0; i < structType.NumField(); i++ {

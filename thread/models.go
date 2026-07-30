@@ -1,5 +1,6 @@
 package thread
 
+// ThreadDetail is a forum thread returned by the thread endpoint, including its articles (posts).
 type ThreadDetail struct {
 	ID          int       `xml:"id,attr"`
 	NumArticles int       `xml:"numarticles,attr"`
@@ -8,6 +9,7 @@ type ThreadDetail struct {
 	Articles    []Article `xml:"articles>article"`
 }
 
+// Article is a single post within a forum thread.
 type Article struct {
 	ID       int    `xml:"id,attr"`
 	Username string `xml:"username,attr"`

@@ -1,13 +1,16 @@
 package forum
 
 import (
+	"context"
+	"net/url"
 	"testing"
 
-	"github.com/kkjdaniel/gogeek/v2"
-	"github.com/kkjdaniel/gogeek/v2/constants"
-	"github.com/kkjdaniel/gogeek/v2/testutils"
+	gogeek "github.com/kkjdaniel/gogeek/v3"
+	"github.com/kkjdaniel/gogeek/v3/constants"
+	"github.com/kkjdaniel/gogeek/v3/internal/testutils"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,11 +19,11 @@ const mockDataFileValid = "testdata/valid_forum_response.xml"
 func TestFetchForum(t *testing.T) {
 	defer testutils.ActivateMocks()()
 
-	url := constants.ForumEndpoint + "?id=123"
-	testutils.SetupMockResponder(t, url, mockDataFileValid)
+	mockURL := constants.ForumEndpoint + "?id=123"
+	testutils.SetupMockResponder(t, mockURL, mockDataFileValid)
 
-	client := gogeek.NewClient()
-	forum, err := Query(client, 123)
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	forum, err := Query(context.Background(), client, 123)
 	require.NoError(t, err, "FetchForum should not return an error")
 	require.NotNil(t, forum, "Forum should not be nil")
 
@@ -67,22 +70,32 @@ func TestFetchForum(t *testing.T) {
 func TestFetchForum_WithPage(t *testing.T) {
 	defer testutils.ActivateMocks()()
 
-	url := constants.ForumEndpoint + "?id=123&page=2"
-	testutils.SetupMockResponder(t, url, mockDataFileValid)
+	mockURL := constants.ForumEndpoint + "?id=123&page=2"
+	testutils.SetupMockResponder(t, mockURL, mockDataFileValid)
 
-	client := gogeek.NewClient()
-	forum, err := Query(client, 123, WithPage(2))
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	forum, err := Query(context.Background(), client, 123, WithPage(2))
 	require.NoError(t, err, "FetchForum with page should not return an error")
 	require.NotNil(t, forum, "Forum should not be nil")
 	require.Equal(t, 123, forum.ID)
+}
+
+func TestWithPage_Invalid(t *testing.T) {
+	params := url.Values{}
+	assert.ErrorIs(t, WithPage(0)(params), gogeek.ErrInvalidOption)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	result, err := Query(context.Background(), client, 123, WithPage(0))
+	assert.ErrorIs(t, err, gogeek.ErrInvalidOption)
+	assert.Nil(t, result)
 }
 
 func TestQuery_Error(t *testing.T) {
 	testURL := constants.ForumEndpoint + "?id=123"
 
 	queryWrapper := func(url string) (*Forum, error) {
-		client := gogeek.NewClient()
-		return Query(client, 123)
+		client := gogeek.NewClient(gogeek.APIKey("test-key"))
+		return Query(context.Background(), client, 123)
 	}
 
 	testutils.TestRequestError(t, testURL, queryWrapper)

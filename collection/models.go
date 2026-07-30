@@ -1,11 +1,13 @@
 package collection
 
+// Collection is a user's BGG collection as returned by the collection endpoint.
 type Collection struct {
 	TotalItems int              `xml:"totalitems,attr"`
 	PubDate    string           `xml:"pubdate,attr"`
 	Items      []CollectionItem `xml:"item"`
 }
 
+// CollectionItem is a single item (e.g. a board game) in a user's BGG collection.
 type CollectionItem struct {
 	ObjectType    string     `xml:"objecttype,attr"`
 	ObjectID      int        `xml:"objectid,attr"`
@@ -21,16 +23,20 @@ type CollectionItem struct {
 	Comment       string     `xml:"comment"`
 }
 
+// ItemStats holds gameplay statistics for a collection item, such as player
+// counts, play times, and community rating data.
 type ItemStats struct {
-	MinPlayers  int          `xml:"minplayers,attr"`
-	MaxPlayers  int          `xml:"maxplayers,attr"`
-	MinPlayTime int          `xml:"minplaytime,attr"`
-	MaxPlayTime int          `xml:"maxplaytime,attr"`
-	PlayingTime int          `xml:"playingtime,attr"`
-	NumOwned    int          `xml:"numowned,attr"`
-	Rating      StatsRating  `xml:"rating"`
+	MinPlayers  int         `xml:"minplayers,attr"`
+	MaxPlayers  int         `xml:"maxplayers,attr"`
+	MinPlayTime int         `xml:"minplaytime,attr"`
+	MaxPlayTime int         `xml:"maxplaytime,attr"`
+	PlayingTime int         `xml:"playingtime,attr"`
+	NumOwned    int         `xml:"numowned,attr"`
+	Rating      StatsRating `xml:"rating"`
 }
 
+// StatsRating holds the user's rating for an item along with aggregate
+// community rating statistics and rank information.
 type StatsRating struct {
 	Value        string      `xml:"value,attr"`
 	UsersRated   RatingValue `xml:"usersrated"`
@@ -41,10 +47,13 @@ type StatsRating struct {
 	Ranks        []StatsRank `xml:"ranks>rank"`
 }
 
+// RatingValue holds a rating statistic exposed as an XML value attribute.
 type RatingValue struct {
 	Value string `xml:"value,attr"`
 }
 
+// StatsRank is an item's rank within a BGG ranking category, such as the
+// overall board game rank or a subdomain rank.
 type StatsRank struct {
 	Type         string `xml:"type,attr"`
 	ID           int    `xml:"id,attr"`
@@ -54,6 +63,8 @@ type StatsRank struct {
 	BayesAverage string `xml:"bayesaverage,attr"`
 }
 
+// ItemStatus holds the ownership and wishlist status flags for a collection
+// item, such as owned, for trade, want to play, and preordered.
 type ItemStatus struct {
 	Own          int    `xml:"own,attr"`
 	PrevOwned    int    `xml:"prevowned,attr"`
