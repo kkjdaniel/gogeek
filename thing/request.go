@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	gogeek "github.com/kkjdaniel/gogeek/v3"
@@ -13,6 +14,10 @@ import (
 
 // ErrNoIDs is returned when no IDs are provided for a query.
 var ErrNoIDs = errors.New("no IDs provided")
+
+// Option represents an option for customizing thing queries.
+// Options validate their arguments and return an error for invalid values.
+type Option func(params url.Values) error
 
 // maxIDsPerRequest is the number of IDs the BGG API accepts in a single
 // thing request.
@@ -33,10 +38,12 @@ const maxIDsPerRequest = 20
 //   - ctx: A context that can cancel or time-bound the request
 //   - client: A GoGeek client configured with authentication
 //   - ids: A slice of integer IDs corresponding to board game entries in the BGG database
+//   - opts: Optional parameters for requesting additional data
 //
 // Returns:
 //   - *Items: A pointer to an Items struct containing the detailed information for the requested games
-//   - error: An error if the API request fails or if the response cannot be parsed
+//   - error: An error if an option is invalid, the API request fails, or the
+//     response cannot be parsed
 //
 // Example:
 //
@@ -46,9 +53,18 @@ const maxIDsPerRequest = 20
 //	    log.Fatalf("Failed to get game details: %v", err)
 //	}
 //	fmt.Printf("Retrieved details for %d games\n", len(details.Items))
-func Query(ctx context.Context, client *gogeek.Client, ids []int) (*Items, error) {
+func Query(ctx context.Context, client *gogeek.Client, ids []int, opts ...Option) (*Items, error) {
 	if len(ids) == 0 {
 		return nil, ErrNoIDs
+	}
+
+	params := url.Values{}
+	params.Set("stats", "1")
+
+	for _, opt := range opts {
+		if err := opt(params); err != nil {
+			return nil, err
+		}
 	}
 
 	var all Items
@@ -60,14 +76,27 @@ func Query(ctx context.Context, client *gogeek.Client, ids []int) (*Items, error
 			idStrings[i] = fmt.Sprintf("%d", id)
 		}
 
-		url := fmt.Sprintf("%s?id=%s&stats=1", constants.ThingEndpoint, strings.Join(idStrings, ","))
+		// The id list is kept outside the encoded parameters so its commas
+		// stay unescaped.
+		queryURL := fmt.Sprintf("%s?id=%s&%s", constants.ThingEndpoint, strings.Join(idStrings, ","), params.Encode())
 
 		var page Items
-		if err := request.FetchAndUnmarshal(ctx, client, url, &page); err != nil {
+		if err := request.FetchAndUnmarshal(ctx, client, queryURL, &page); err != nil {
 			return nil, err
 		}
 		all.Items = append(all.Items, page.Items...)
 	}
 
 	return &all, nil
+}
+
+// WithVideos includes the community-submitted videos for each item.
+//
+// The endpoint returns only the most recent videos, capped at a handful per
+// item, while Videos.Total reports how many exist in total.
+func WithVideos() Option {
+	return func(params url.Values) error {
+		params.Set("videos", "1")
+		return nil
+	}
 }
