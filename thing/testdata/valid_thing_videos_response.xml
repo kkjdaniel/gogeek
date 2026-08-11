@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item type="boardgame" id="9">
+        <thumbnail>https://example.com/images/game_thumbnail.jpg</thumbnail>
+        <image>https://example.com/images/game_full.jpg</image>
+        <name type="primary" sortindex="1" value="Example Game"/>
+        <description>This is an example description for a board game.</description>
+        <yearpublished value="2000"/>
+        <minplayers value="2"/>
+        <maxplayers value="4"/>
+        <playingtime value="90"/>
+        <minplaytime value="90"/>
+        <maxplaytime value="90"/>
+        <minage value="10"/>
+        <videos total="4">
+            <video id="501" title="Example Game Review" category="review" language="English"
+                   link="https://www.youtube.com/watch?v=example1" username="reviewer_one" userid="1001"
+                   postdate="2020-01-15T12:00:00-06:00"/>
+            <video id="502" title="Comment jouer a Example Game" category="instructional" language="French"
+                   link="https://www.youtube.com/watch?v=example2" username="joueur_deux" userid="1002"
+                   postdate="2021-06-02T09:30:00-05:00"/>
+            <video id="503" title="Example Game Unboxing" category="unboxing" language="English"
+                   link="https://www.youtube.com/watch?v=example3" username="unboxer_three" userid="1003"
+                   postdate="2022-11-20T18:45:00-06:00"/>
+            <video id="504" title="Example Game Session Report" category="session" language="German"
+                   link="https://www.youtube.com/watch?v=example4" username="spieler_vier" userid="1004"
+                   postdate="2023-03-08T07:15:00-06:00"/>
+        </videos>
+    </item>
+</items>

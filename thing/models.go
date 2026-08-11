@@ -22,6 +22,7 @@ type Item struct {
 	Image         string        `xml:"image"`
 	Links         []Link        `xml:"link"`
 	Statistics    *Statistics   `xml:"statistics>ratings"`
+	Videos        *Videos       `xml:"videos"`
 	Polls         []Poll        `xml:"poll"`
 	PollSummaries []PollSummary `xml:"poll-summary"`
 }
@@ -80,6 +81,27 @@ type Rank struct {
 	Friendly     string `xml:"friendlyname,attr"`
 	Value        string `xml:"value,attr"`
 	BayesAverage string `xml:"bayesaverage,attr"`
+}
+
+// Videos holds the community-submitted videos for an item.
+// It is only populated when the query is made WithVideos.
+type Videos struct {
+	// Total is the number of videos BGG holds for the item, which can be
+	// far larger than the number of entries returned in Videos.
+	Total  int     `xml:"total,attr"`
+	Videos []Video `xml:"video"`
+}
+
+// Video is a single community-submitted video linked to an item.
+type Video struct {
+	ID       int    `xml:"id,attr"`
+	Title    string `xml:"title,attr"`
+	Category string `xml:"category,attr"`
+	Language string `xml:"language,attr"`
+	Link     string `xml:"link,attr"`
+	Username string `xml:"username,attr"`
+	UserID   int    `xml:"userid,attr"`
+	PostDate string `xml:"postdate,attr"`
 }
 
 // Poll is a community poll for an item, such as suggested player counts, player age, or language dependence.

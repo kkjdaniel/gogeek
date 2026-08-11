@@ -124,6 +124,34 @@ func TestContract_Thing(t *testing.T) {
 	assertFieldCoverage(t, rawXML, thing.Items{}, "thing")
 }
 
+func TestContract_Thing_WithVideos(t *testing.T) {
+	client := newClient(t)
+	ctx := context.Background()
+	url := fmt.Sprintf("%s?id=%d&stats=1&videos=1", constants.ThingEndpoint, catanThingID)
+
+	result, err := thing.Query(ctx, client, []int{catanThingID}, thing.WithVideos())
+	require.NoError(t, err, "thing.Query with videos should not error")
+	require.NotEmpty(t, result.Items, "should return at least one item")
+
+	item := result.Items[0]
+	require.NotNil(t, item.Videos, "a game as established as Catan should carry videos")
+	require.NotEmpty(t, item.Videos.Videos, "the videos element should hold entries")
+	assert.Greater(t, item.Videos.Total, 0, "total should be positive")
+
+	video := item.Videos.Videos[0]
+	assert.Greater(t, video.ID, 0, "video should have an ID")
+	assert.NotEmpty(t, video.Title, "video should have a title")
+	assert.NotEmpty(t, video.Category, "video should have a category")
+	assert.NotEmpty(t, video.Link, "video should have a link")
+	assert.NotEmpty(t, video.Username, "video should have an uploader")
+	assert.NotEmpty(t, video.PostDate, "video should have a post date")
+
+	// Field coverage: check the API hasn't added fields our model doesn't capture
+	rawXML, err := fetchRawXML(ctx, client, url)
+	require.NoError(t, err, "fetching raw XML for coverage check")
+	assertFieldCoverage(t, rawXML, thing.Items{}, "thing?videos=1")
+}
+
 func TestContract_Thing_MultipleIDs(t *testing.T) {
 	client := newClient(t)
 
