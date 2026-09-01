@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item type="boardgame" id="9">
+        <thumbnail>https://example.com/images/game_thumbnail.jpg</thumbnail>
+        <image>https://example.com/images/game_full.jpg</image>
+        <name type="primary" sortindex="1" value="Example Game"/>
+        <description>This is an example description for a board game.</description>
+        <yearpublished value="2000"/>
+        <minplayers value="2"/>
+        <maxplayers value="4"/>
+        <playingtime value="90"/>
+        <minplaytime value="90"/>
+        <maxplaytime value="90"/>
+        <minage value="10"/>
+        <marketplacelistings>
+            <listing>
+                <listdate value="Tue, 05 Mar 2024 10:00:00 +0000"/>
+                <price currency="USD" value="45.00"/>
+                <condition value="new"/>
+                <notes value="Shrink-wrapped, ships worldwide."/>
+                <link href="https://boardgamegeek.com/market/product/101" title="marketlisting"/>
+            </listing>
+            <listing>
+                <listdate value="Sat, 20 Jul 2024 18:30:00 +0000"/>
+                <price currency="EUR" value="30.50"/>
+                <condition value="verygood"/>
+                <notes value="Played twice, complete."/>
+                <link href="https://boardgamegeek.com/market/product/102" title="marketlisting"/>
+            </listing>
+        </marketplacelistings>
+    </item>
+</items>

@@ -5,12 +5,23 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	gogeek "github.com/kkjdaniel/gogeek/v3"
 	"github.com/kkjdaniel/gogeek/v3/constants"
 	"github.com/kkjdaniel/gogeek/v3/internal/request"
 )
+
+// validThingTypes are the thing types accepted by the type parameter.
+var validThingTypes = map[string]bool{
+	"boardgame":          true,
+	"boardgameaccessory": true,
+	"boardgameexpansion": true,
+	"rpgitem":            true,
+	"rpgissue":           true,
+	"videogame":          true,
+}
 
 // ErrNoIDs is returned when no IDs are provided for a query.
 var ErrNoIDs = errors.New("no IDs provided")
@@ -97,6 +108,91 @@ func Query(ctx context.Context, client *gogeek.Client, ids []int, opts ...Option
 func WithVideos() Option {
 	return func(params url.Values) error {
 		params.Set("videos", "1")
+		return nil
+	}
+}
+
+// WithType filters the results to the given thing types.
+// Valid types: boardgame, boardgameaccessory, boardgameexpansion, rpgitem, rpgissue, videogame
+func WithType(thingTypes ...string) Option {
+	return func(params url.Values) error {
+		if len(thingTypes) == 0 {
+			return fmt.Errorf("%w: at least one thing type is required", gogeek.ErrInvalidOption)
+		}
+		for _, t := range thingTypes {
+			if !validThingTypes[t] {
+				return fmt.Errorf("%w: invalid thing type %q", gogeek.ErrInvalidOption, t)
+			}
+		}
+		params.Set("type", strings.Join(thingTypes, ","))
+		return nil
+	}
+}
+
+// WithVersions includes the published versions of each item, such as
+// individual printings and localisations.
+func WithVersions() Option {
+	return func(params url.Values) error {
+		params.Set("versions", "1")
+		return nil
+	}
+}
+
+// WithMarketplace includes the current BGG marketplace listings for each item.
+func WithMarketplace() Option {
+	return func(params url.Values) error {
+		params.Set("marketplace", "1")
+		return nil
+	}
+}
+
+// WithComments includes one page of user comments for each item, with the
+// commenter's rating when they have given one. It cannot be combined with
+// WithRatingComments. Use WithPage and WithPageSize to page through them.
+func WithComments() Option {
+	return func(params url.Values) error {
+		if params.Get("ratingcomments") == "1" {
+			return fmt.Errorf("%w: comments and rating comments cannot be requested together", gogeek.ErrInvalidOption)
+		}
+		params.Set("comments", "1")
+		return nil
+	}
+}
+
+// WithRatingComments includes one page of user ratings for each item, sorted
+// by ascending rating and carrying the comment when one was left. It cannot
+// be combined with WithComments. Use WithPage and WithPageSize to page
+// through them.
+func WithRatingComments() Option {
+	return func(params url.Values) error {
+		if params.Get("comments") == "1" {
+			return fmt.Errorf("%w: comments and rating comments cannot be requested together", gogeek.ErrInvalidOption)
+		}
+		params.Set("ratingcomments", "1")
+		return nil
+	}
+}
+
+// WithPage selects the page of comments or ratings to return. The default is
+// page 1.
+func WithPage(page int) Option {
+	return func(params url.Values) error {
+		if page < 1 {
+			return fmt.Errorf("%w: page must be at least 1, got %d", gogeek.ErrInvalidOption, page)
+		}
+		params.Set("page", strconv.Itoa(page))
+		return nil
+	}
+}
+
+// WithPageSize sets the number of comments or ratings per page, between 10
+// and 100.
+func WithPageSize(size int) Option {
+	return func(params url.Values) error {
+		if size < 10 || size > 100 {
+			return fmt.Errorf("%w: page size must be between 10 and 100, got %d", gogeek.ErrInvalidOption, size)
+		}
+		params.Set("pagesize", strconv.Itoa(size))
 		return nil
 	}
 }

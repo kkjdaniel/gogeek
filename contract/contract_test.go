@@ -32,14 +32,15 @@ import (
 
 // Well-known stable IDs for contract testing.
 const (
-	catanThingID    = 13          // Catan - a well-established game that won't be removed
-	catanFamilyID   = 3           // Catan family
-	knownUsername   = "kkjdaniel" // An established BGG user
-	knownGuildID    = 1           // First guild on BGG
-	knownForumID    = 19          // A well-known BGG forum
-	knownThreadID   = 100000      // A long-standing thread
-	knownForumObjID = 13          // Catan's forum list (thing type)
-	unrankedThingID = 399366      // An obscure unranked item
+	catanThingID        = 13          // Catan - a well-established game that won't be removed
+	catanFamilyID       = 3           // Catan family
+	carcassonneFamilyID = 2           // Carcassonne family
+	knownUsername       = "kkjdaniel" // An established BGG user
+	knownGuildID        = 1           // First guild on BGG
+	knownForumID        = 19          // A well-known BGG forum
+	knownThreadID       = 100000      // A long-standing thread
+	knownForumObjID     = 13          // Catan's forum list (thing type)
+	unrankedThingID     = 399366      // An obscure unranked item
 )
 
 func TestMain(m *testing.M) {
@@ -150,6 +151,97 @@ func TestContract_Thing_WithVideos(t *testing.T) {
 	rawXML, err := fetchRawXML(ctx, client, url)
 	require.NoError(t, err, "fetching raw XML for coverage check")
 	assertFieldCoverage(t, rawXML, thing.Items{}, "thing?videos=1")
+}
+
+func TestContract_Thing_WithVersions(t *testing.T) {
+	client := newClient(t)
+	ctx := context.Background()
+	url := fmt.Sprintf("%s?id=%d&stats=1&versions=1", constants.ThingEndpoint, catanThingID)
+
+	result, err := thing.Query(ctx, client, []int{catanThingID}, thing.WithVersions())
+	require.NoError(t, err, "thing.Query with versions should not error")
+	require.NotEmpty(t, result.Items, "should return at least one item")
+
+	item := result.Items[0]
+	require.NotEmpty(t, item.Versions, "a game as established as Catan should carry versions")
+
+	version := item.Versions[0]
+	assert.Greater(t, version.ID, 0, "version should have an ID")
+	assert.NotEmpty(t, version.Type, "version should have a type")
+	assert.NotEmpty(t, version.Name, "version should have a name")
+	assert.NotEmpty(t, version.Links, "version should carry links")
+
+	// Field coverage: check the API hasn't added fields our model doesn't capture
+	rawXML, err := fetchRawXML(ctx, client, url)
+	require.NoError(t, err, "fetching raw XML for coverage check")
+	assertFieldCoverage(t, rawXML, thing.Items{}, "thing?versions=1")
+}
+
+func TestContract_Thing_WithComments(t *testing.T) {
+	client := newClient(t)
+	ctx := context.Background()
+	url := fmt.Sprintf("%s?id=%d&comments=1&stats=1", constants.ThingEndpoint, catanThingID)
+
+	result, err := thing.Query(ctx, client, []int{catanThingID}, thing.WithComments())
+	require.NoError(t, err, "thing.Query with comments should not error")
+	require.NotEmpty(t, result.Items, "should return at least one item")
+
+	item := result.Items[0]
+	require.NotNil(t, item.Comments, "a game as established as Catan should carry comments")
+	require.NotEmpty(t, item.Comments.Comments, "the comments element should hold entries")
+	assert.Equal(t, 1, item.Comments.Page, "the first page should be returned by default")
+	assert.Greater(t, item.Comments.Total, 0, "totalitems should be positive")
+	assert.NotEmpty(t, item.Comments.Comments[0].Username, "comment should have a username")
+
+	// Field coverage: check the API hasn't added fields our model doesn't capture
+	rawXML, err := fetchRawXML(ctx, client, url)
+	require.NoError(t, err, "fetching raw XML for coverage check")
+	assertFieldCoverage(t, rawXML, thing.Items{}, "thing?comments=1")
+}
+
+func TestContract_Thing_WithRatingComments(t *testing.T) {
+	client := newClient(t)
+
+	result, err := thing.Query(context.Background(), client, []int{catanThingID}, thing.WithRatingComments(), thing.WithPageSize(10))
+	require.NoError(t, err, "thing.Query with rating comments should not error")
+	require.NotEmpty(t, result.Items, "should return at least one item")
+
+	item := result.Items[0]
+	require.NotNil(t, item.Comments, "ratings arrive in the comments node")
+	require.NotEmpty(t, item.Comments.Comments, "the comments element should hold entries")
+	assert.NotEqual(t, "N/A", item.Comments.Comments[0].Rating, "rating comments should all carry a rating")
+}
+
+func TestContract_Thing_WithMarketplace(t *testing.T) {
+	client := newClient(t)
+	ctx := context.Background()
+	url := fmt.Sprintf("%s?id=%d&marketplace=1&stats=1", constants.ThingEndpoint, catanThingID)
+
+	result, err := thing.Query(ctx, client, []int{catanThingID}, thing.WithMarketplace())
+	require.NoError(t, err, "thing.Query with marketplace should not error")
+	require.NotEmpty(t, result.Items, "should return at least one item")
+
+	item := result.Items[0]
+	require.NotEmpty(t, item.Marketplace, "a game as established as Catan should carry listings")
+
+	listing := item.Marketplace[0]
+	assert.NotEmpty(t, listing.Price.Currency, "listing should have a currency")
+	assert.NotEmpty(t, listing.Condition.Value, "listing should have a condition")
+	assert.NotEmpty(t, listing.Link.Href, "listing should link to the marketplace page")
+
+	// Field coverage: check the API hasn't added fields our model doesn't capture
+	rawXML, err := fetchRawXML(ctx, client, url)
+	require.NoError(t, err, "fetching raw XML for coverage check")
+	assertFieldCoverage(t, rawXML, thing.Items{}, "thing?marketplace=1")
+}
+
+func TestContract_Thing_WithType(t *testing.T) {
+	client := newClient(t)
+
+	// Catan is a boardgame, so filtering for expansions must exclude it.
+	result, err := thing.Query(context.Background(), client, []int{catanThingID}, thing.WithType("boardgameexpansion"))
+	require.NoError(t, err, "thing.Query with a type filter should not error")
+	assert.Empty(t, result.Items, "a boardgame should be filtered out by an expansion-only query")
 }
 
 func TestContract_Thing_MultipleIDs(t *testing.T) {
@@ -329,6 +421,15 @@ func TestContract_Family(t *testing.T) {
 	rawXML, err := fetchRawXML(ctx, client, url)
 	require.NoError(t, err, "fetching raw XML for coverage check")
 	assertFieldCoverage(t, rawXML, family.Family{}, "family")
+}
+
+func TestContract_Family_MultipleIDs(t *testing.T) {
+	client := newClient(t)
+
+	// Catan and Carcassonne families in one request.
+	result, err := family.Query(context.Background(), client, catanFamilyID, "boardgamefamily", carcassonneFamilyID)
+	require.NoError(t, err, "family.Query with multiple IDs should not error")
+	require.Len(t, result.Items, 2, "both families should be returned")
 }
 
 func TestContract_Forum(t *testing.T) {

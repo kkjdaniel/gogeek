@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item type="boardgame" id="9">
+        <thumbnail>https://example.com/images/game_thumbnail.jpg</thumbnail>
+        <image>https://example.com/images/game_full.jpg</image>
+        <name type="primary" sortindex="1" value="Example Game"/>
+        <description>This is an example description for a board game.</description>
+        <yearpublished value="2000"/>
+        <minplayers value="2"/>
+        <maxplayers value="4"/>
+        <playingtime value="90"/>
+        <minplaytime value="90"/>
+        <maxplaytime value="90"/>
+        <minage value="10"/>
+        <versions>
+            <item type="boardgameversion" id="701">
+                <thumbnail>https://example.com/images/version_thumbnail.jpg</thumbnail>
+                <image>https://example.com/images/version_full.jpg</image>
+                <link type="boardgameversion" id="9" value="Example Game" inbound="true"/>
+                <name type="primary" sortindex="1" value="English first edition"/>
+                <canonicalname value="Example Game: English first edition"/>
+                <yearpublished value="2000"/>
+                <productcode value="EG-001"/>
+                <width value="11.6"/>
+                <length value="11.6"/>
+                <depth value="2.8"/>
+                <weight value="4.85"/>
+                <link type="boardgamepublisher" id="6001" value="Publisher One"/>
+                <link type="language" id="2184" value="English"/>
+            </item>
+            <item type="boardgameversion" id="702">
+                <thumbnail>https://example.com/images/version2_thumbnail.jpg</thumbnail>
+                <image>https://example.com/images/version2_full.jpg</image>
+                <link type="boardgameversion" id="9" value="Example Game" inbound="true"/>
+                <name type="primary" sortindex="1" value="German edition"/>
+                <canonicalname value="Example Game: German edition"/>
+                <yearpublished value="2002"/>
+                <productcode value="EG-002-DE"/>
+                <width value="11.6"/>
+                <length value="11.6"/>
+                <depth value="2.8"/>
+                <weight value="4.85"/>
+                <link type="boardgamepublisher" id="6002" value="Publisher Two"/>
+                <link type="language" id="2188" value="German"/>
+            </item>
+        </versions>
+    </item>
+</items>

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 
 	gogeek "github.com/kkjdaniel/gogeek/v3"
 	"github.com/kkjdaniel/gogeek/v3/constants"
@@ -23,11 +25,11 @@ const (
 // RPG, RPGPeriodical, or BoardGameFamily.
 var ErrInvalidFamilyType = errors.New("invalid family type")
 
-// Query retrieves detailed information about a specific board game family from the BoardGameGeek API.
+// Query retrieves detailed information about one or more board game families from the BoardGameGeek API.
 //
-// The function accepts a family ID and returns a structured representation
+// The function accepts family IDs and returns a structured representation
 // of the family details including the family name, description, and links to games
-// within that family.
+// within each family.
 //
 // Parameters:
 //   - ctx: A context that can cancel or time-bound the request
@@ -35,6 +37,7 @@ var ErrInvalidFamilyType = errors.New("invalid family type")
 //   - id: An integer ID corresponding to a board game family in the BGG database
 //   - familyType: A string indicating the type of family to query.
 //     Must be one of the defined constants: family.RPG, family.RPGPeriodical, or family.BoardGameFamily
+//   - moreIDs: Optional additional family IDs to retrieve in the same request
 //
 // Returns:
 //   - *Items: A pointer to an Items struct containing the family information
@@ -49,13 +52,18 @@ var ErrInvalidFamilyType = errors.New("invalid family type")
 //	    log.Fatalf("Failed to get family: %v", err)
 //	}
 //	fmt.Printf("Family: %s (contains %d games)\n", family.Items[0].Name.Value, len(family.Items[0].Links))
-func Query(ctx context.Context, client *gogeek.Client, id int, familyType string) (*Family, error) {
+func Query(ctx context.Context, client *gogeek.Client, id int, familyType string, moreIDs ...int) (*Family, error) {
 	if !isValidFamilyType(familyType) {
 		return nil, fmt.Errorf("%w: %s (must be one of: %s, %s, %s)",
 			ErrInvalidFamilyType, familyType, RPG, RPGPeriodical, BoardGameFamily)
 	}
 
-	url := fmt.Sprintf("%s?id=%d&type=%s", constants.FamilyEndpoint, id, familyType)
+	idStrings := make([]string, 0, 1+len(moreIDs))
+	for _, v := range append([]int{id}, moreIDs...) {
+		idStrings = append(idStrings, strconv.Itoa(v))
+	}
+
+	url := fmt.Sprintf("%s?id=%s&type=%s", constants.FamilyEndpoint, strings.Join(idStrings, ","), familyType)
 
 	var familyDetail Family
 

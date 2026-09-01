@@ -28,6 +28,13 @@ Only include the sections that apply. GitHub release notes should copy the
 entry verbatim rather than using a different format.
 -->
 
+## v3.2.0
+
+### New
+
+- `thing.Query` gains the remaining API parameters as options: `WithType` filters results by thing type, `WithVersions` populates `Versions` with each item's published editions, `WithMarketplace` populates `Marketplace` with current sale listings, and `WithComments` / `WithRatingComments` populate `Comments` with user comments or ratings, paged via `WithPage` and `WithPageSize`.
+- `family.Query` accepts additional IDs after the family type, so several families can be fetched in one request.
+
 ## v3.1.0
 
 ### New

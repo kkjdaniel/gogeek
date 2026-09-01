@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+    <item type="boardgame" id="9">
+        <thumbnail>https://example.com/images/game_thumbnail.jpg</thumbnail>
+        <image>https://example.com/images/game_full.jpg</image>
+        <name type="primary" sortindex="1" value="Example Game"/>
+        <description>This is an example description for a board game.</description>
+        <yearpublished value="2000"/>
+        <minplayers value="2"/>
+        <maxplayers value="4"/>
+        <playingtime value="90"/>
+        <minplaytime value="90"/>
+        <maxplaytime value="90"/>
+        <minage value="10"/>
+        <comments page="1" totalitems="8543">
+            <comment username="player_one" rating="8" value="A modern classic, still hits the table."/>
+            <comment username="player_two" rating="N/A" value="Traded away after two plays."/>
+            <comment username="player_three" rating="6.5" value=""/>
+        </comments>
+    </item>
+</items>

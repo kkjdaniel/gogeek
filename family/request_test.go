@@ -57,6 +57,23 @@ func TestQueryFamily(t *testing.T) {
 	}
 }
 
+func TestQueryFamily_MultipleIDs(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	// The mock only answers the URL carrying both IDs, so this pins the
+	// comma-delimited format.
+	url := constants.FamilyEndpoint + "?id=12,34&type=" + BoardGameFamily
+	testutils.SetupMockResponderWithBody(t, url,
+		`<items><item type="boardgamefamily" id="12"></item><item type="boardgamefamily" id="34"></item></items>`, 200)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	family, err := Query(context.Background(), client, 12, BoardGameFamily, 34)
+	require.NoError(t, err, "Query should accept additional IDs")
+	require.Len(t, family.Items, 2, "both families should be returned")
+	require.Equal(t, 12, family.Items[0].ID)
+	require.Equal(t, 34, family.Items[1].ID)
+}
+
 func TestQueryFamily_Error(t *testing.T) {
 	testURL := constants.FamilyEndpoint + "?id=12"
 

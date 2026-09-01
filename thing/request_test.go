@@ -17,8 +17,11 @@ import (
 )
 
 const (
-	mockDataFileValid       = "testdata/valid_thing_response.xml"
-	mockDataFileValidVideos = "testdata/valid_thing_videos_response.xml"
+	mockDataFileValid            = "testdata/valid_thing_response.xml"
+	mockDataFileValidVideos      = "testdata/valid_thing_videos_response.xml"
+	mockDataFileValidVersions    = "testdata/valid_thing_versions_response.xml"
+	mockDataFileValidComments    = "testdata/valid_thing_comments_response.xml"
+	mockDataFileValidMarketplace = "testdata/valid_thing_marketplace_response.xml"
 )
 
 func TestQueryThing(t *testing.T) {
@@ -334,6 +337,172 @@ func TestQueryThing_WithoutVideosIsUnchanged(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, thing.Items, 1)
 	require.Nil(t, thing.Items[0].Videos, "Videos should stay nil when not requested")
+}
+
+func TestQueryThing_WithVersions(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	url := constants.ThingEndpoint + "?id=9&stats=1&versions=1"
+	testutils.SetupMockResponder(t, url, mockDataFileValidVersions)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	thing, err := Query(context.Background(), client, []int{9}, WithVersions())
+	require.NoError(t, err)
+	require.Len(t, thing.Items, 1)
+
+	versions := thing.Items[0].Versions
+	require.Len(t, versions, 2, "Versions should be populated when WithVersions is used")
+
+	expected := Version{
+		Type:          "boardgameversion",
+		ID:            701,
+		Thumbnail:     "https://example.com/images/version_thumbnail.jpg",
+		Image:         "https://example.com/images/version_full.jpg",
+		Name:          []Name{{Type: "primary", SortIndex: 1, Value: "English first edition"}},
+		CanonicalName: StringValue{Value: "Example Game: English first edition"},
+		YearPublished: IntValue{Value: 2000},
+		ProductCode:   StringValue{Value: "EG-001"},
+		Width:         FloatValue{Value: 11.6},
+		Length:        FloatValue{Value: 11.6},
+		Depth:         FloatValue{Value: 2.8},
+		Weight:        FloatValue{Value: 4.85},
+		Links: []VersionLink{
+			{Type: "boardgameversion", ID: 9, Value: "Example Game", Inbound: true},
+			{Type: "boardgamepublisher", ID: 6001, Value: "Publisher One"},
+			{Type: "language", ID: 2184, Value: "English"},
+		},
+	}
+
+	if diff := cmp.Diff(expected, versions[0]); diff != "" {
+		t.Errorf("Version mismatch (-want +got):\n%s", diff)
+	}
+	require.Equal(t, 702, versions[1].ID)
+}
+
+func TestQueryThing_WithComments(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	url := constants.ThingEndpoint + "?comments=1&id=9&stats=1"
+	testutils.SetupMockResponder(t, url, mockDataFileValidComments)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	thing, err := Query(context.Background(), client, []int{9}, WithComments())
+	require.NoError(t, err)
+	require.Len(t, thing.Items, 1)
+
+	comments := thing.Items[0].Comments
+	require.NotNil(t, comments, "Comments should be populated when WithComments is used")
+
+	expected := &Comments{
+		Page:  1,
+		Total: 8543,
+		Comments: []Comment{
+			{Username: "player_one", Rating: "8", Value: "A modern classic, still hits the table."},
+			{Username: "player_two", Rating: "N/A", Value: "Traded away after two plays."},
+			{Username: "player_three", Rating: "6.5", Value: ""},
+		},
+	}
+
+	if diff := cmp.Diff(expected, comments); diff != "" {
+		t.Errorf("Comments mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestQueryThing_WithRatingComments(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	url := constants.ThingEndpoint + "?id=9&ratingcomments=1&stats=1"
+	testutils.SetupMockResponder(t, url, mockDataFileValidComments)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	thing, err := Query(context.Background(), client, []int{9}, WithRatingComments())
+	require.NoError(t, err)
+	require.NotNil(t, thing.Items[0].Comments, "ratings also arrive in the comments node")
+}
+
+func TestQueryThing_CommentsAndRatingCommentsAreExclusive(t *testing.T) {
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+
+	_, err := Query(context.Background(), client, []int{9}, WithComments(), WithRatingComments())
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption)
+
+	_, err = Query(context.Background(), client, []int{9}, WithRatingComments(), WithComments())
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption, "the error should hold in either order")
+}
+
+func TestQueryThing_WithMarketplace(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	url := constants.ThingEndpoint + "?id=9&marketplace=1&stats=1"
+	testutils.SetupMockResponder(t, url, mockDataFileValidMarketplace)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	thing, err := Query(context.Background(), client, []int{9}, WithMarketplace())
+	require.NoError(t, err)
+	require.Len(t, thing.Items, 1)
+
+	listings := thing.Items[0].Marketplace
+	require.Len(t, listings, 2, "Marketplace should be populated when WithMarketplace is used")
+
+	expected := Listing{
+		ListDate:  StringValue{Value: "Tue, 05 Mar 2024 10:00:00 +0000"},
+		Price:     Price{Currency: "USD", Value: 45.00},
+		Condition: StringValue{Value: "new"},
+		Notes:     StringValue{Value: "Shrink-wrapped, ships worldwide."},
+		Link:      ListingLink{Href: "https://boardgamegeek.com/market/product/101", Title: "marketlisting"},
+	}
+
+	if diff := cmp.Diff(expected, listings[0]); diff != "" {
+		t.Errorf("Listing mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestQueryThing_WithType(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	// The mock only answers the URL carrying the type filter, so this also
+	// pins the encoded parameter format.
+	url := constants.ThingEndpoint + "?id=9&stats=1&type=boardgame%2Cboardgameexpansion"
+	testutils.SetupMockResponder(t, url, mockDataFileValid)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	thing, err := Query(context.Background(), client, []int{9}, WithType("boardgame", "boardgameexpansion"))
+	require.NoError(t, err)
+	require.Len(t, thing.Items, 1)
+}
+
+func TestQueryThing_WithType_Invalid(t *testing.T) {
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+
+	_, err := Query(context.Background(), client, []int{9}, WithType("boardgamedesigner"))
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption)
+
+	_, err = Query(context.Background(), client, []int{9}, WithType())
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption, "no types at all should also be rejected")
+}
+
+func TestQueryThing_WithPageAndPageSize(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	url := constants.ThingEndpoint + "?comments=1&id=9&page=2&pagesize=50&stats=1"
+	testutils.SetupMockResponder(t, url, mockDataFileValidComments)
+
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	_, err := Query(context.Background(), client, []int{9}, WithComments(), WithPage(2), WithPageSize(50))
+	require.NoError(t, err)
+}
+
+func TestQueryThing_PagingValidation(t *testing.T) {
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+
+	_, err := Query(context.Background(), client, []int{9}, WithPage(0))
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption)
+
+	_, err = Query(context.Background(), client, []int{9}, WithPageSize(9))
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption)
+
+	_, err = Query(context.Background(), client, []int{9}, WithPageSize(101))
+	require.ErrorIs(t, err, gogeek.ErrInvalidOption)
 }
 
 func TestQueryThing_OptionErrorIsReturned(t *testing.T) {

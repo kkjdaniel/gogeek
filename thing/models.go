@@ -23,6 +23,9 @@ type Item struct {
 	Links         []Link        `xml:"link"`
 	Statistics    *Statistics   `xml:"statistics>ratings"`
 	Videos        *Videos       `xml:"videos"`
+	Versions      []Version     `xml:"versions>item"`
+	Comments      *Comments     `xml:"comments"`
+	Marketplace   []Listing     `xml:"marketplacelistings>listing"`
 	Polls         []Poll        `xml:"poll"`
 	PollSummaries []PollSummary `xml:"poll-summary"`
 }
@@ -102,6 +105,75 @@ type Video struct {
 	Username string `xml:"username,attr"`
 	UserID   int    `xml:"userid,attr"`
 	PostDate string `xml:"postdate,attr"`
+}
+
+// Version is a published edition of an item, such as an individual printing
+// or localisation. It is only populated when the query is made WithVersions.
+type Version struct {
+	Type          string        `xml:"type,attr"`
+	ID            int           `xml:"id,attr"`
+	Thumbnail     string        `xml:"thumbnail"`
+	Image         string        `xml:"image"`
+	Name          []Name        `xml:"name"`
+	CanonicalName StringValue   `xml:"canonicalname"`
+	YearPublished IntValue      `xml:"yearpublished"`
+	ProductCode   StringValue   `xml:"productcode"`
+	Width         FloatValue    `xml:"width"`
+	Length        FloatValue    `xml:"length"`
+	Depth         FloatValue    `xml:"depth"`
+	Weight        FloatValue    `xml:"weight"`
+	Links         []VersionLink `xml:"link"`
+}
+
+// VersionLink relates a version to another BGG entity, such as its base item,
+// publisher, artist, or language. Inbound is true on links that point from
+// the related entity to the version, such as the base item link.
+type VersionLink struct {
+	Type    string `xml:"type,attr"`
+	ID      int    `xml:"id,attr"`
+	Value   string `xml:"value,attr"`
+	Inbound bool   `xml:"inbound,attr"`
+}
+
+// Comments holds one page of user comments or ratings for an item. It is only
+// populated when the query is made WithComments or WithRatingComments.
+type Comments struct {
+	Page int `xml:"page,attr"`
+	// Total is the number of comments BGG holds for the item across all
+	// pages, not the number of entries in Comments.
+	Total    int       `xml:"totalitems,attr"`
+	Comments []Comment `xml:"comment"`
+}
+
+// Comment is a single user comment or rating on an item. Rating is "N/A" when
+// the commenter has not rated the item; Value is empty when a rating carries
+// no comment.
+type Comment struct {
+	Username string `xml:"username,attr"`
+	Rating   string `xml:"rating,attr"`
+	Value    string `xml:"value,attr"`
+}
+
+// Listing is a single copy of an item for sale in the BGG marketplace. It is
+// only populated when the query is made WithMarketplace.
+type Listing struct {
+	ListDate  StringValue `xml:"listdate"`
+	Price     Price       `xml:"price"`
+	Condition StringValue `xml:"condition"`
+	Notes     StringValue `xml:"notes"`
+	Link      ListingLink `xml:"link"`
+}
+
+// Price is the asking price of a marketplace listing.
+type Price struct {
+	Currency string  `xml:"currency,attr"`
+	Value    float64 `xml:"value,attr"`
+}
+
+// ListingLink points to a marketplace listing's page on BGG.
+type ListingLink struct {
+	Href  string `xml:"href,attr"`
+	Title string `xml:"title,attr"`
 }
 
 // Poll is a community poll for an item, such as suggested player counts, player age, or language dependence.

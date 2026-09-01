@@ -18,8 +18,8 @@ GoGeek is a Go client for the [BoardGameGeek API](https://boardgamegeek.com/wiki
 - **🔄 Simple Request Handling**: GoGeek manages the HTTP requests so you can work with the data instead.
 - **🔐 Authentication Support**: API key and cookie-based authentication for authenticated endpoints.
 - **📄 Data Parsing**: Converts and normalises XML responses from the BGG API into Go structs.
-- **⚠️ Error Handling**: Clear errors for network failures, rate limiting, queued requests and unexpected response formats.
-- **✅ Full API Coverage**: Every BGG XML API2 endpoint is supported, with contract tests that run against the live API to catch structural changes.
+- **⚠️ Error Handling**: Clear errors for network failures, rate limits and unexpected responses.
+- **✅ Full API Coverage**: Every BGG XML API2 endpoint, verified by contract tests against the live API.
 
 ## Setup
 
@@ -104,6 +104,26 @@ All clients enforce a rate limit of **2 requests per second** to comply with Boa
 - The `thing` query accepts any number of IDs; batches of more than 20 are split into multiple rate-limited requests automatically
 - Query filters use per-package options (e.g. `plays.WithPage(2)`, `collection.WithOwned(true)`); invalid option values return an error wrapping `gogeek.ErrInvalidOption` before any request is made
 - Some options request extra data, such as `thing.WithVideos()`, which populates each item's `Videos` field with its community-submitted videos
+
+## API support
+
+Every endpoint in the [BGG XML API2](https://boardgamegeek.com/wiki/page/BGG_XML_API2) is supported, along with all of its working parameters.
+
+| API endpoint | Package | Supported |
+|---|---|:---:|
+| `/thing` | `thing` | ✅ |
+| `/family` | `family` | ✅ |
+| `/forumlist` | `forumlist` | ✅ |
+| `/forum` | `forum` | ✅ |
+| `/thread` | `thread` | ✅ |
+| `/user` | `user` | ✅ |
+| `/guild` | `guild` | ✅ |
+| `/plays` | `plays` | ✅ |
+| `/collection` | `collection` | ✅ |
+| `/hot` | `hot` | ✅ |
+| `/search` | `search` | ✅ |
+
+Parameters the API itself no longer supports (`historical`, `from`, and `to` on `/thing`; `username` on `/thread`) are omitted, and geeklists are excluded because they were never added to XML API2.
 
 ## Documentation
 
