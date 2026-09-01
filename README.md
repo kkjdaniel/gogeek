@@ -11,19 +11,19 @@
   <a href="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml"><img src="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg" alt="Contract Tests"></a>
 </p>
 
-GoGeek is a lightweight, easy-to-use Go module designed to streamline interactions with the [BoardGameGeek API](https://boardgamegeek.com/wiki/page/BGG_XML_API2) (XML API2).
+GoGeek is a Go client for the [BoardGameGeek API](https://boardgamegeek.com/wiki/page/BGG_XML_API2) (XML API2). It handles the HTTP requests, authentication, rate limiting, and XML parsing so you can work with plain Go structs.
 
 ## Key Features
 
-- **🔄 Simple Request Handling**: GoGeek abstracts the BGG API request process, allowing you to focus on utilising the data rather than managing HTTP requests.
-- **🔐 Authentication Support**: Built-in support for API key and cookie-based authentication to access authenticated endpoints.
-- **📄 Data Parsing**: Automatically converts and normalises XML responses from the BGG API into Go structs, so you can work with structured data effortlessly.
-- **⚠️ Error Handling**: Robust error handling for common issues like network errors, rate limiting, queued requests and unexpected response formats.
-- **✅ Full API Coverage**: All BGG XML API2 endpoints are supported, with automated contract tests that run against the live API weekly to detect any structural changes or drift.
+- **🔄 Simple Request Handling**: GoGeek manages the HTTP requests so you can work with the data instead.
+- **🔐 Authentication Support**: API key and cookie-based authentication for authenticated endpoints.
+- **📄 Data Parsing**: Converts and normalises XML responses from the BGG API into Go structs.
+- **⚠️ Error Handling**: Clear errors for network failures, rate limiting, queued requests and unexpected response formats.
+- **✅ Full API Coverage**: Every BGG XML API2 endpoint is supported, with contract tests that run against the live API to catch structural changes.
 
 ## Setup
 
-To setup GoGeek, use the following `go get` command:
+Install with `go get`:
 
 ```bash
 go get github.com/kkjdaniel/gogeek/v3
@@ -31,9 +31,9 @@ go get github.com/kkjdaniel/gogeek/v3
 
 ## Usage
 
-### Basic Usage
+### Basic usage
 
-Getting started with GoGeek is easy. First, create a client, then use it to make API requests:
+Create a client, then use it to make API requests:
 
 ```go
 package main
@@ -75,18 +75,18 @@ Year Published: 1998
 
 ### Authentication
 
-All BGG endpoints require authorisation — anonymous access is no longer supported by the API, so every client is constructed with credentials.
+All BGG endpoints require authorisation. Anonymous access is no longer supported by the API, so every client is constructed with credentials.
 
-**API Key Authentication** (recommended):
+**API key** (recommended):
 
 ```go
 client := gogeek.NewClient(gogeek.APIKey("your-api-key"))
 collection, err := collection.Query(ctx, client, "username")
 ```
 
-Note: To get an API key you can request one via the [application form here.](https://boardgamegeek.com/applications)
+You can request an API key via BGG's [application form](https://boardgamegeek.com/applications).
 
-**Cookie Authentication** (can access private collection data an API key may not):
+**Cookie** (can access private collection data an API key may not):
 
 ```go
 cookie := "bggusername=user; bggpassword=pass; SessionID=xyz"
@@ -94,20 +94,21 @@ client := gogeek.NewClient(gogeek.Cookie(cookie))
 user, err := user.Query(ctx, client, "username")
 ```
 
-### Rate Limiting & Retries
+### Rate limiting and retries
 
 All clients enforce a rate limit of **2 requests per second** to comply with BoardGameGeek's API guidelines, time out requests after 30 seconds, and automatically retry queued (202) or throttled (429/503) responses with exponential backoff. All of this is configurable via client options, e.g. `gogeek.WithRateLimit(1)`, `gogeek.WithRetry(3, time.Second)`, `gogeek.WithHTTPClient(custom)`.
 
 ### Notes
 
 - Every query takes a `context.Context`, so requests can be cancelled or given deadlines
-- The `thing` query accepts any number of IDs — batches of more than 20 are split into multiple rate-limited requests automatically
+- The `thing` query accepts any number of IDs; batches of more than 20 are split into multiple rate-limited requests automatically
 - Query filters use per-package options (e.g. `plays.WithPage(2)`, `collection.WithOwned(true)`); invalid option values return an error wrapping `gogeek.ErrInvalidOption` before any request is made
+- Some options request extra data, such as `thing.WithVideos()`, which populates each item's `Videos` field with its community-submitted videos
 
 ## Documentation
 
-For the full documentation please see the [GoDoc here](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3). Details on how to use each query function as well as the interfaces for each of the APIs can be found within their respective packages.
+Full documentation is on [pkg.go.dev](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3). Each package documents its query function and the structs it returns.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue on GitHub to help improve GoGeek.
+Contributions are welcome. Open an issue or submit a pull request on GitHub to help improve GoGeek.
