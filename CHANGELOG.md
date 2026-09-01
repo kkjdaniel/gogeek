@@ -1,5 +1,39 @@
 # Changelog
 
+<!--
+Every tagged release gets an entry here, newest first, in the same commit or
+PR as the change. Template:
+
+## vX.Y.Z
+
+One-line summary if the release needs one (e.g. a module path change).
+
+### Breaking changes
+
+- **Short name**: what changed. Migration: `old` → `new`.
+
+### New
+
+- What was added, with the exported names in backticks (`pkg.WithOption`).
+
+### Fixed
+
+- What was broken and what it does now.
+
+### Removed dependencies
+
+- `module/path` — why it's no longer needed.
+
+Only include the sections that apply. GitHub release notes should copy the
+entry verbatim rather than using a different format.
+-->
+
+## v3.1.0
+
+### New
+
+- `thing.Query` takes functional options; `thing.WithVideos()` sets `videos=1` and populates the new `Videos` field on `Item` with the community-submitted videos (title, category, language, link, poster, post date). Options apply to every batch when querying more than 20 IDs.
+
 ## v3.0.0
 
 Module path is now `github.com/kkjdaniel/gogeek/v3`.
