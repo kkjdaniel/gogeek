@@ -215,6 +215,35 @@ func TestInvalidParameterValues(t *testing.T) {
 		}
 	})
 
+	t.Run("BGG rating invalid bounds", func(t *testing.T) {
+		for _, invalid := range []float64{0.5, 10.5, -1.0, 11.0} {
+			params := url.Values{}
+			err := WithMinBGGRating(invalid)(params)
+			assert.ErrorIs(t, err, gogeek.ErrInvalidOption,
+				"Should reject invalid value %f", invalid)
+			assert.Empty(t, params.Get("minbggrating"))
+
+			params = url.Values{}
+			err = WithMaxBGGRating(invalid)(params)
+			assert.ErrorIs(t, err, gogeek.ErrInvalidOption,
+				"Should reject invalid value %f", invalid)
+			assert.Empty(t, params.Get("bggrating"))
+		}
+	})
+
+	t.Run("Plays negative value", func(t *testing.T) {
+		params := url.Values{}
+		assert.ErrorIs(t, WithMinPlays(-1)(params), gogeek.ErrInvalidOption)
+		assert.ErrorIs(t, WithMaxPlays(-1)(params), gogeek.ErrInvalidOption)
+		assert.Empty(t, params)
+	})
+
+	t.Run("ItemIDs requires at least one ID", func(t *testing.T) {
+		params := url.Values{}
+		assert.ErrorIs(t, WithItemIDs()(params), gogeek.ErrInvalidOption)
+		assert.Empty(t, params.Get("id"))
+	})
+
 	t.Run("Subtype invalid value", func(t *testing.T) {
 		params := url.Values{}
 		assert.ErrorIs(t, WithSubtype("bogus")(params), gogeek.ErrInvalidOption)

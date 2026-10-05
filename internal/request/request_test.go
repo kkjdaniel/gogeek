@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
+	"io"
 	"net/http"
 	"testing"
+	"testing/iotest"
 	"time"
 
+	"github.com/jarcoal/httpmock"
 	gogeek "github.com/kkjdaniel/gogeek/v3"
 	"github.com/kkjdaniel/gogeek/v3/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -134,6 +137,48 @@ func TestFetchAndUnmarshal_UnmarshalError(t *testing.T) {
 
 	require.Error(t, err, "FetchAndUnmarshal should return an error when unmarshaling fails")
 	require.True(t, errors.Is(err, ErrUnmarshalError), "Error should be of type ErrUnmarshalError")
+}
+
+func TestFetchAndUnmarshal_InvalidURL(t *testing.T) {
+	var result struct{}
+	err := FetchAndUnmarshal(context.Background(), testClient(), "http://example.com/\x7f", &result)
+
+	require.Error(t, err, "FetchAndUnmarshal should return an error when the request cannot be built")
+	require.True(t, errors.Is(err, ErrHTTPError), "Error should be of type ErrHTTPError")
+}
+
+func TestFetchAndUnmarshal_EmptyBody(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	testURL := "https://example.com/api/empty"
+	testutils.SetupMockResponderWithBody(t, testURL, "", http.StatusOK)
+
+	var result struct{}
+	err := FetchAndUnmarshal(context.Background(), testClient(), testURL, &result)
+
+	require.True(t, errors.Is(err, ErrEmptyResponse), "Error should be of type ErrEmptyResponse")
+}
+
+func TestFetchAndUnmarshal_BodyReadError(t *testing.T) {
+	defer testutils.ActivateMocks()()
+
+	testURL := "https://example.com/api/read-error"
+	httpmock.RegisterResponder("GET", testURL,
+		func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(iotest.ErrReader(errors.New("connection reset"))),
+				Header:     http.Header{},
+				Request:    req,
+			}, nil
+		})
+
+	var result struct{}
+	err := FetchAndUnmarshal(context.Background(), testClient(), testURL, &result)
+
+	require.Error(t, err, "FetchAndUnmarshal should return an error when the body cannot be read")
+	require.True(t, errors.Is(err, ErrHTTPError), "Error should be of type ErrHTTPError")
+	require.Contains(t, err.Error(), "connection reset", "Error should include the underlying read error")
 }
 
 func TestFetchAndUnmarshal_Status202_EventualSuccess(t *testing.T) {
@@ -335,5 +380,25 @@ func TestBackoffDelay(t *testing.T) {
 		got := backoffDelay(base, attempt, 0)
 		require.GreaterOrEqual(t, got, expected/2, "attempt %d", attempt)
 		require.LessOrEqual(t, got, expected, "attempt %d", attempt)
+	}
+}
+
+func TestFixMalformedXML(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"preserves XML entities", "<a>Tom &amp; Jerry &lt;3 &#233; &#xE9;</a>", "<a>Tom &amp; Jerry &lt;3 &#233; &#xE9;</a>"},
+		{"unescapes HTML entities", "<a>caf&eacute;</a>", "<a>café</a>"},
+		{"escapes unknown entities", "<a>&bogus;</a>", "<a>&amp;bogus;</a>"},
+		{"escapes bare ampersands", "<a>Dungeons & Dragons</a>", "<a>Dungeons &amp; Dragons</a>"},
+		{"strips control characters", "<a>bad\x00\x0Bchars\ttab</a>", "<a>badchars\ttab</a>"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.expected, string(fixMalformedXML([]byte(tt.input))))
+		})
 	}
 }

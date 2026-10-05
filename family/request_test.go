@@ -84,3 +84,10 @@ func TestQueryFamily_Error(t *testing.T) {
 
 	testutils.TestRequestError(t, testURL, queryWrapper)
 }
+
+func TestQueryFamily_InvalidType(t *testing.T) {
+	client := gogeek.NewClient(gogeek.APIKey("test-key"))
+	family, err := Query(context.Background(), client, 12, "bogus")
+	require.ErrorIs(t, err, ErrInvalidFamilyType, "Query should reject unknown family types")
+	require.Nil(t, family)
+}
