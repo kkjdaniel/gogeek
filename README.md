@@ -112,17 +112,17 @@ Every endpoint in the [BGG XML API2](https://boardgamegeek.com/wiki/page/BGG_XML
 
 | API endpoint | Package | Supported |
 |---|---|:---:|
-| [`/thing`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc3) | `thing` | ✅ |
-| [`/family`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc4) | `family` | ✅ |
-| [`/forumlist`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc5) | `forumlist` | ✅ |
-| [`/forum`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc6) | `forum` | ✅ |
-| [`/thread`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc7) | `thread` | ✅ |
-| [`/user`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc8) | `user` | ✅ |
-| [`/guild`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc9) | `guild` | ✅ |
-| [`/plays`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc10) | `plays` | ✅ |
-| [`/collection`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11) | `collection` | ✅ |
-| [`/hot`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc12) | `hot` | ✅ |
-| [`/search`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc14) | `search` | ✅ |
+| [`/thing`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc3) | [`thing`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/thing) | ✅ |
+| [`/family`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc4) | [`family`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/family) | ✅ |
+| [`/forumlist`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc5) | [`forumlist`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/forumlist) | ✅ |
+| [`/forum`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc6) | [`forum`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/forum) | ✅ |
+| [`/thread`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc7) | [`thread`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/thread) | ✅ |
+| [`/user`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc8) | [`user`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/user) | ✅ |
+| [`/guild`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc9) | [`guild`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/guild) | ✅ |
+| [`/plays`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc10) | [`plays`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/plays) | ✅ |
+| [`/collection`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11) | [`collection`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/collection) | ✅ |
+| [`/hot`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc12) | [`hot`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/hot) | ✅ |
+| [`/search`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc14) | [`search`](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3/search) | ✅ |
 
 Parameters the API itself no longer supports (`historical`, `from`, and `to` on `/thing`; `username` on `/thread`) are omitted, and geeklists are excluded because they were never added to XML API2.
 
