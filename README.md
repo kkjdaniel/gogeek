@@ -1,25 +1,11 @@
-<p align="center">
-  <img src="gogeek-logo.png" width="350" alt="GoGeek Logo">
-</p>
-
-<h1 align="center">GoGeek: BoardGameGeek API for Go</h1>
-
-<p align="center">
-  <a href="https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3"><img src="https://pkg.go.dev/badge/github.com/kkjdaniel/gogeek/v3.svg" alt="Go Reference"></a>
-  <a href="https://github.com/kkjdaniel/gogeek/actions/workflows/lint.yml"><img src="https://github.com/kkjdaniel/gogeek/actions/workflows/lint.yml/badge.svg" alt="Lint"></a>
-  <a href="https://codecov.io/gh/kkjdaniel/gogeek"><img src="https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D" alt="codecov"></a>
-  <a href="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml"><img src="https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg" alt="Contract Tests"></a>
-</p>
+<a href="https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3"><img src="assets/readme-banner.png" alt="GoGeek: a Go client for the BoardGameGeek API" width="100%"></a>
 
 GoGeek is a Go client for the [BoardGameGeek API](https://boardgamegeek.com/wiki/page/BGG_XML_API2) (XML API2). It handles the HTTP requests, authentication, rate limiting, and XML parsing so you can work with plain Go structs.
 
-## Key Features
-
-- **🔄 Simple Request Handling**: GoGeek manages the HTTP requests so you can work with the data instead.
-- **🔐 Authentication Support**: API key and cookie-based authentication for authenticated endpoints.
-- **📄 Data Parsing**: Converts and normalises XML responses from the BGG API into Go structs.
-- **⚠️ Error Handling**: Clear errors for network failures, rate limits and unexpected responses.
-- **✅ Full API Coverage**: Every BGG XML API2 endpoint, verified by contract tests against the live API.
+[![Go Reference](https://pkg.go.dev/badge/github.com/kkjdaniel/gogeek/v3.svg)](https://pkg.go.dev/github.com/kkjdaniel/gogeek/v3)
+[![Lint](https://github.com/kkjdaniel/gogeek/actions/workflows/lint.yml/badge.svg)](https://github.com/kkjdaniel/gogeek/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/kkjdaniel/gogeek/graph/badge.svg?token=W78TFFY83D)](https://codecov.io/gh/kkjdaniel/gogeek)
+[![Contract Tests](https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml/badge.svg)](https://github.com/kkjdaniel/gogeek/actions/workflows/contract-tests.yml)
 
 ## Setup
 
@@ -86,7 +72,7 @@ collection, err := collection.Query(ctx, client, "username")
 
 You can request an API key via BGG's [application form](https://boardgamegeek.com/applications).
 
-**Cookie** (can access private collection data an API key may not):
+**Cookie**:
 
 ```go
 cookie := "bggusername=user; bggpassword=pass; SessionID=xyz"
@@ -96,7 +82,22 @@ user, err := user.Query(ctx, client, "username")
 
 ### Rate limiting and retries
 
-All clients enforce a rate limit of **2 requests per second** to comply with BoardGameGeek's API guidelines, time out requests after 30 seconds, and automatically retry queued (202) or throttled (429/503) responses with exponential backoff. All of this is configurable via client options, e.g. `gogeek.WithRateLimit(1)`, `gogeek.WithRetry(3, time.Second)`, `gogeek.WithHTTPClient(custom)`.
+By default, every client:
+
+- Limits requests to **2 per second**, in line with BoardGameGeek's API guidelines
+- Times out requests after 30 seconds
+- Retries queued (202) and throttled (429/503) responses with exponential backoff
+
+Each of these can be changed with client options:
+
+```go
+client := gogeek.NewClient(
+	gogeek.APIKey("your-api-key"),
+	gogeek.WithRateLimit(1),
+	gogeek.WithRetry(3, time.Second),
+	gogeek.WithHTTPClient(custom),
+)
+```
 
 ### Notes
 
@@ -111,17 +112,17 @@ Every endpoint in the [BGG XML API2](https://boardgamegeek.com/wiki/page/BGG_XML
 
 | API endpoint | Package | Supported |
 |---|---|:---:|
-| `/thing` | `thing` | ✅ |
-| `/family` | `family` | ✅ |
-| `/forumlist` | `forumlist` | ✅ |
-| `/forum` | `forum` | ✅ |
-| `/thread` | `thread` | ✅ |
-| `/user` | `user` | ✅ |
-| `/guild` | `guild` | ✅ |
-| `/plays` | `plays` | ✅ |
-| `/collection` | `collection` | ✅ |
-| `/hot` | `hot` | ✅ |
-| `/search` | `search` | ✅ |
+| [`/thing`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc3) | `thing` | ✅ |
+| [`/family`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc4) | `family` | ✅ |
+| [`/forumlist`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc5) | `forumlist` | ✅ |
+| [`/forum`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc6) | `forum` | ✅ |
+| [`/thread`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc7) | `thread` | ✅ |
+| [`/user`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc8) | `user` | ✅ |
+| [`/guild`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc9) | `guild` | ✅ |
+| [`/plays`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc10) | `plays` | ✅ |
+| [`/collection`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11) | `collection` | ✅ |
+| [`/hot`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc12) | `hot` | ✅ |
+| [`/search`](https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc14) | `search` | ✅ |
 
 Parameters the API itself no longer supports (`historical`, `from`, and `to` on `/thing`; `username` on `/thread`) are omitted, and geeklists are excluded because they were never added to XML API2.
 
